@@ -1,13 +1,18 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { contacts } from "../lib/mock-data";
+import { userProfiles } from "../lib/mock-data";
 import { useAppState } from "../lib/app-state";
 
 export const Route = createFileRoute("/matches/$contactId")({
   loader: ({ params }) => {
-    const contact = contacts.find((c) => c.id === params.contactId);
-    if (!contact) throw notFound();
-    return { contact };
+    const profile = userProfiles.find((c) => c.id === params.contactId);
+    if (!profile) throw notFound();
+    return {
+      contact: {
+        ...profile,
+        avatar: profile.photo, // Map photo to avatar for backward compatibility
+      },
+    };
   },
   head: ({ loaderData }) => {
     if (!loaderData) {

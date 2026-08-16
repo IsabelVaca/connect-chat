@@ -121,6 +121,32 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+import { useNavigate } from "@tanstack/react-router";
+import { DetailedProfileView } from "../components/DetailedProfileView";
+import { useAppState } from "../lib/app-state";
+
+function RootAppStateOverlay() {
+  const { selectedProfileId, setSelectedProfileId, userProfiles, startChat } = useAppState();
+  const navigate = useNavigate();
+
+  if (!selectedProfileId) return null;
+
+  const profile = userProfiles.find((p) => p.id === selectedProfileId);
+  if (!profile) return null;
+
+  return (
+    <DetailedProfileView
+      profile={profile}
+      onClose={() => setSelectedProfileId(null)}
+      onMessage={(id) => {
+        startChat(id);
+        setSelectedProfileId(null);
+        navigate({ to: "/matches/$contactId", params: { contactId: id } });
+      }}
+    />
+  );
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
@@ -129,7 +155,9 @@ function RootComponent() {
       <AppStateProvider>
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <Outlet />
+        <RootAppStateOverlay />
       </AppStateProvider>
     </QueryClientProvider>
   );
 }
+

@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { TopAppBar } from "../components/TopAppBar";
 import { BottomNav } from "../components/BottomNav";
-import { contacts, mutualMatches } from "../lib/mock-data";
+import { mutualMatches } from "../lib/mock-data";
 import { useAppState } from "../lib/app-state";
 
 export const Route = createFileRoute("/matches/")({
@@ -23,7 +23,7 @@ export const Route = createFileRoute("/matches/")({
 });
 
 function Matches() {
-  const { conversations } = useAppState();
+  const { conversations, contacts, setSelectedProfileId } = useAppState();
 
   return (
     <div className="bg-surface text-on-surface min-h-screen flex flex-col pb-[90px]">
@@ -37,9 +37,10 @@ function Matches() {
           </div>
           <div className="flex overflow-x-auto hide-scrollbar px-container-margin gap-4 pb-4">
             {mutualMatches.map((match) => (
-              <div
+              <button
                 key={match.id}
-                className="flex flex-col items-center gap-2 flex-shrink-0 cursor-pointer group"
+                onClick={() => setSelectedProfileId(match.id)}
+                className="flex flex-col items-center gap-2 flex-shrink-0 cursor-pointer group border-0 bg-transparent text-left outline-none"
               >
                 <div className="relative w-[72px] h-[72px]">
                   <img
@@ -62,7 +63,7 @@ function Matches() {
                 <span className="font-label-sm text-label-sm text-on-surface text-center">
                   {match.name}
                 </span>
-              </div>
+              </button>
             ))}
             <div className="flex flex-col items-center justify-center gap-2 flex-shrink-0 w-[72px]">
               <button className="w-[72px] h-[72px] rounded-full bg-surface-container-low border border-outline-variant flex items-center justify-center text-brand hover:bg-surface-container-high transition-colors">
@@ -98,7 +99,14 @@ function Matches() {
                   }`}
                 >
                   {unread && <div className="absolute left-0 top-0 bottom-0 w-1 bg-brand" />}
-                  <div className="relative w-14 h-14 flex-shrink-0">
+                  <div
+                    className="relative w-14 h-14 flex-shrink-0 cursor-pointer hover:scale-105 active:scale-95 transition-transform"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setSelectedProfileId(contact.id);
+                    }}
+                  >
                     <img
                       className={`w-full h-full rounded-full object-cover ${unread ? "" : "opacity-90"}`}
                       alt={`${contact.name}'s profile`}
@@ -158,3 +166,4 @@ function Matches() {
     </div>
   );
 }
+
