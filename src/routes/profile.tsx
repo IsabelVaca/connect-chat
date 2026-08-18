@@ -108,11 +108,12 @@ function Profile() {
       const lon = parseFloat(result.lon);
       setSelectedLocation({ name: result.display_name, lat, lon });
 
-      if (mapRef.current) {
+      if (mapRef.current && leafletRef.current) {
         mapRef.current.setView([lat, lon], 13);
         markerRef.current?.remove();
-        markerRef.current = L.marker([lat, lon]).addTo(mapRef.current);
+        markerRef.current = leafletRef.current.marker([lat, lon]).addTo(mapRef.current);
       }
+
     } catch (error) {
       console.error("Error searching location:", error);
     } finally {
