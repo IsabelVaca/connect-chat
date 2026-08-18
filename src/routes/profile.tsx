@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { TopAppBar } from "../components/TopAppBar";
 import { BottomNav } from "../components/BottomNav";
@@ -29,7 +29,11 @@ export const Route = createFileRoute("/profile")({
 });
 
 function Profile() {
+  const navigate = useNavigate();
   const [budget, setBudget] = useState(1500);
+  const [fullName, setFullName] = useState("");
+  const [age, setAge] = useState("");
+  const [profileImage, setProfileImage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedLocation, setSelectedLocation] = useState<{
     name: string;
@@ -46,6 +50,7 @@ function Profile() {
   const mapRef = useRef<L.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const markerRef = useRef<L.Marker | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const interestsList = [
     "Coffee",
@@ -380,11 +385,67 @@ function Profile() {
             </label>
           </div>
         </section>
+
+        <section className="bg-surface-container-lowest rounded-[24px] p-stack-md shadow-[0_8px_30px_rgba(169,51,73,0.06)] flex flex-col gap-stack-sm">
+          <h3 className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">
+            Personal Information
+          </h3>
+          <label className="flex flex-col gap-2">
+            <span className="font-label-md text-label-md text-on-surface">Full Name</span>
+            <input
+              type="text"
+              value={fullName}
+              onChange={(event) => setFullName(event.target.value)}
+              placeholder="Your name and last name"
+              className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl py-4 px-4 text-body-md text-on-surface placeholder:text-on-surface-variant/70 focus:border-brand focus:ring-1 focus:ring-brand outline-none transition-colors"
+            />
+          </label>
+          <label className="flex flex-col gap-2">
+            <span className="font-label-md text-label-md text-on-surface">Age</span>
+            <input
+              type="number"
+              min={18}
+              value={age}
+              onChange={(event) => setAge(event.target.value)}
+              placeholder="Your age"
+              className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl py-4 px-4 text-body-md text-on-surface placeholder:text-on-surface-variant/70 focus:border-brand focus:ring-1 focus:ring-brand outline-none transition-colors"
+            />
+          </label>
+          <label className="flex flex-col gap-2">
+            <span className="font-label-md text-label-md text-on-surface">Profile Image</span>
+            {!profileImage && <span className="text-body-sm italic text-on-surface-variant">Sin archivos adjuntos.</span>}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                if (file) setProfileImage(URL.createObjectURL(file));
+              }}
+              className="sr-only"
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="flex items-center justify-center gap-2 rounded-xl border border-outline-variant px-4 py-3 text-body-md text-on-surface hover:bg-surface-container-high transition-colors"
+            >
+              <span className="material-symbols-outlined">attach_file</span>
+              Adjuntar archivo
+            </button>
+            {profileImage && (
+              <img src={profileImage} alt="Profile preview" className="h-24 w-24 rounded-full object-cover" />
+            )}
+          </label>
+        </section>
       </main>
 
       <div className="fixed bottom-[88px] left-0 w-full bg-surface/90 backdrop-blur-md border-t border-surface-container p-container-margin z-40">
         <div className="max-w-[600px] mx-auto">
-          <button className="w-full bg-gradient-to-r from-brand to-[#c2425a] text-on-brand font-headline-md text-[20px] font-semibold py-4 rounded-xl shadow-[0_8px_25px_rgba(169,51,73,0.3)] hover:scale-[1.02] transition-transform active:scale-95 flex items-center justify-center gap-2">
+          <button
+            type="button"
+            onClick={() => navigate({ to: "/" })}
+            className="w-full bg-gradient-to-r from-brand to-[#c2425a] text-on-brand font-headline-md text-[20px] font-semibold py-4 rounded-xl shadow-[0_8px_25px_rgba(169,51,73,0.3)] hover:scale-[1.02] transition-transform active:scale-95 flex items-center justify-center gap-2"
+          >
             Find Roomies
             <span className="material-symbols-outlined">arrow_forward</span>
           </button>
