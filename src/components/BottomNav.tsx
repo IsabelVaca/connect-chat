@@ -14,7 +14,7 @@ export function BottomNav() {
           key={item.to}
           to={item.to}
           activeOptions={{ exact: item.to === "/" }}
-          className="flex flex-col items-center justify-center text-on-surface-variant px-5 py-1 rounded-full transition-colors hover:bg-surface-container-high data-[status=active]:bg-primary-container data-[status=active]:text-on-primary-container"
+          className="flex flex-col items-center justify-center text-on-surface-variant px-5 py-1 rounded-full transition-colors hover:bg-surface-container-high data-[status=active]:text-brand"
         >
           <span className="material-symbols-outlined mb-1">{item.icon}</span>
           <span className="font-label-sm text-label-sm">{item.label}</span>
