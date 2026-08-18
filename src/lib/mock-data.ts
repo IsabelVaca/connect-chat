@@ -149,7 +149,7 @@ export const userProfiles: UserProfile[] = [
     location: "North Beach",
     rent: 1350,
     compatibility: 85,
-    photo: "https://lh3.googleusercontent.com/aida-public/AB6AXuB69No9aY_ES4Q_aSYFKTNsX2lI9DBdZjveIED1UIP2xxCMVb1U-pCQofB11C-hDLLwPwScZ0e67GZu7qjMq2FywE7gy3kC6GyWQUHCGW-P43bsmQdMBmMC2Yc9vEs4lfnj38s2tpv7kPWAztdXZKPALVsbzKFBfYECHQBNQdgOObrUzbXsmlhvx89XSoITSvFlOh9k9aBdE61uaq6IoMO8SPKQQU77NuAcvhLKfEP3YJxCZANdOIlC",
+    photo: "https://i.pravatar.cc/600?img=13",
     bio: "Avid hiker and coffee enthusiast. I work hybrid as a graphic designer. I'm active on weekends, but love a quiet weekday evening. Let's find a cozy place together!",
     interests: ["Coffee", "Hiking", "Design", "Outdoors", "Music"],
     lifestyle: [

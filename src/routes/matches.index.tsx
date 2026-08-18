@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import type { MouseEvent } from "react";
 import { TopAppBar } from "../components/TopAppBar";
 import { BottomNav } from "../components/BottomNav";
 import { mutualMatches } from "../lib/mock-data";
@@ -21,6 +22,14 @@ export const Route = createFileRoute("/matches/")({
   }),
   component: Matches,
 });
+
+function handlePointerMove(event: MouseEvent<HTMLAnchorElement>) {
+  const rect = event.currentTarget.getBoundingClientRect();
+  const x = ((event.clientX - rect.left) / rect.width) * 100;
+  const y = ((event.clientY - rect.top) / rect.height) * 100;
+  event.currentTarget.style.setProperty("--mx", `${x}%`);
+  event.currentTarget.style.setProperty("--my", `${y}%`);
+}
 
 function Matches() {
   const { conversations, contacts, setSelectedProfileId } = useAppState();
@@ -52,13 +61,6 @@ function Matches() {
                     alt={`${match.name}'s profile`}
                     src={match.avatar}
                   />
-                  {match.isNew && (
-                    <div className="absolute bottom-0 right-0 bg-teal text-on-teal w-6 h-6 rounded-full flex items-center justify-center border-2 border-surface">
-                      <span className="material-symbols-outlined text-[14px] icon-filled">
-                        favorite
-                      </span>
-                    </div>
-                  )}
                 </div>
                 <span className="font-label-sm text-label-sm text-on-surface text-center">
                   {match.name}
@@ -92,13 +94,17 @@ function Matches() {
                   key={contact.id}
                   to="/matches/$contactId"
                   params={{ contactId: contact.id }}
-                  className={`rounded-xl p-4 flex items-center gap-4 cursor-pointer transition-colors relative overflow-hidden ${
+                  onMouseMove={handlePointerMove}
+                  className={`group isolate rounded-xl p-4 flex items-center gap-4 cursor-pointer transition-colors relative overflow-hidden ${
                     unread
-                      ? "bg-surface-container-lowest shadow-[0_8px_24px_rgba(169,51,73,0.06)] hover:bg-surface-bright"
-                      : "bg-surface border border-outline-variant/30 hover:bg-surface-bright"
+                      ? "bg-surface-container-lowest shadow-[0_8px_24px_rgba(169,51,73,0.06)]"
+                      : "bg-surface border border-outline-variant/30"
                   }`}
                 >
-                  {unread && <div className="absolute left-0 top-0 bottom-0 w-1 bg-brand" />}
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-0 -z-10 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-[radial-gradient(circle_220px_at_var(--mx,50%)_var(--my,50%),rgba(255,255,255,0.9)_0%,rgba(255,255,255,0)_100%)]"
+                  />
                   <div
                     className="relative w-14 h-14 flex-shrink-0 cursor-pointer hover:scale-105 active:scale-95 transition-transform"
                     onClick={(e) => {
