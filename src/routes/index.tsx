@@ -92,20 +92,13 @@ function Discovery() {
             </div>
           </div>
         </button>
-        <div className="flex justify-center items-center gap-6 z-10 pt-stack-sm">
+        <div className="flex justify-center items-center gap-8 z-10 pt-stack-sm">
           <button
             onClick={cycleProfile}
             aria-label="Pass"
             className="w-14 h-14 rounded-full bg-surface-container-lowest shadow-[0_10px_20px_rgba(186,26,26,0.15)] flex items-center justify-center text-error hover:scale-105 active:scale-95 transition-all duration-200 border border-error-container/30 focus:outline-none focus:ring-4 focus:ring-error/20 cursor-pointer"
           >
             <span className="material-symbols-outlined text-3xl font-bold">close</span>
-          </button>
-          <button
-            onClick={cycleProfile}
-            aria-label="Super like"
-            className="w-12 h-12 rounded-full bg-surface-container-lowest shadow-[0_8px_16px_rgba(40,54,74,0.12)] flex items-center justify-center text-tertiary hover:scale-105 active:scale-95 transition-all duration-200 border border-tertiary-container/30 focus:outline-none focus:ring-4 focus:ring-tertiary/20 cursor-pointer"
-          >
-            <span className="material-symbols-outlined text-2xl font-bold">star</span>
           </button>
           <button
             onClick={cycleProfile}
