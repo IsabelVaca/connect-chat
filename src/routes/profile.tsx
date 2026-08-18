@@ -48,6 +48,11 @@ function Profile() {
   const [cleanliness, setCleanliness] = useState<string>("");
   const [socialLevel, setSocialLevel] = useState<string>("");
   const [guests, setGuests] = useState<string>("");
+  const [profileId, setProfileId] = useState<string | null>(null);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<string>("");
+
   const leafletRef = useRef<typeof import("leaflet") | null>(null);
   const mapRef = useRef<L.Map | null>(null);
 
