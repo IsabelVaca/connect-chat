@@ -67,19 +67,27 @@ function Profile() {
   ];
 
   useEffect(() => {
-    if (!mapContainerRef.current || mapRef.current) return;
-
-    mapRef.current = L.map(mapContainerRef.current).setView([40.7128, -74.006], 13);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "© OpenStreetMap contributors",
-      maxZoom: 19,
-    }).addTo(mapRef.current);
+    let cancelled = false;
+    void (async () => {
+      const leaflet = (await import("leaflet")).default;
+      if (cancelled || !mapContainerRef.current || mapRef.current) return;
+      leafletRef.current = leaflet;
+      mapRef.current = leaflet.map(mapContainerRef.current).setView([40.7128, -74.006], 13);
+      leaflet
+        .tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution: "© OpenStreetMap contributors",
+          maxZoom: 19,
+        })
+        .addTo(mapRef.current);
+    })();
 
     return () => {
+      cancelled = true;
       mapRef.current?.remove();
       mapRef.current = null;
     };
   }, []);
+
 
   const searchLocation = async (query: string) => {
     if (!query.trim()) return;
