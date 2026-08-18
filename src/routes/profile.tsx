@@ -1,8 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { TopAppBar } from "../components/TopAppBar";
 import { BottomNav } from "../components/BottomNav";
-import { useAppState } from "../lib/app-state";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({
@@ -22,52 +28,275 @@ export const Route = createFileRoute("/profile")({
   component: Profile,
 });
 
-const suggestions = ["San Francisco, CA", "Oakland, CA", "Berkeley, CA"];
-
 function Profile() {
-  const { location, setLocation } = useAppState();
   const [budget, setBudget] = useState(1500);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedLocation, setSelectedLocation] = useState<{
+    name: string;
+    lat: number;
+    lon: number;
+  } | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
+  const [bio, setBio] = useState("");
+  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+  const [sleepSchedule, setSleepSchedule] = useState<string>("");
+  const [cleanliness, setCleanliness] = useState<string>("");
+  const [socialLevel, setSocialLevel] = useState<string>("");
+  const [guests, setGuests] = useState<string>("");
+  const mapRef = useRef<L.Map | null>(null);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const markerRef = useRef<L.Marker | null>(null);
+
+  const interestsList = [
+    "Coffee",
+    "Hiking",
+    "Gaming",
+    "Yoga",
+    "Plants",
+    "Music",
+    "Cooking",
+    "Gym",
+    "Movies",
+    "Travel",
+  ];
+
+  useEffect(() => {
+    if (!mapContainerRef.current || mapRef.current) return;
+
+    mapRef.current = L.map(mapContainerRef.current).setView([40.7128, -74.006], 13);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "© OpenStreetMap contributors",
+      maxZoom: 19,
+    }).addTo(mapRef.current);
+
+    return () => {
+      mapRef.current?.remove();
+      mapRef.current = null;
+    };
+  }, []);
+
+  const searchLocation = async (query: string) => {
+    if (!query.trim()) return;
+
+    setIsSearching(true);
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`
+      );
+      const data = await response.json();
+
+      if (data.length === 0) return;
+
+      const result = data[0];
+      const lat = parseFloat(result.lat);
+      const lon = parseFloat(result.lon);
+      setSelectedLocation({ name: result.display_name, lat, lon });
+
+      if (mapRef.current) {
+        mapRef.current.setView([lat, lon], 13);
+        markerRef.current?.remove();
+        markerRef.current = L.marker([lat, lon]).addTo(mapRef.current);
+      }
+    } catch (error) {
+      console.error("Error searching location:", error);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleSearchSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    void searchLocation(searchQuery);
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-surface text-on-surface">
       <TopAppBar />
       <main className="flex-grow px-container-margin py-stack-md flex flex-col gap-stack-lg max-w-[600px] mx-auto w-full pb-56">
-        <section className="flex flex-col gap-base">
+        {/* Location Section */}
+        <section className="flex flex-col gap-stack-md">
           <h2 className="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">
             Where to?
           </h2>
-          <div className="relative">
-            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">
-              search
-            </span>
+          <form onSubmit={handleSearchSubmit} className="flex gap-2">
             <input
               type="text"
-              value={location}
-              onChange={(event) => setLocation(event.target.value)}
-              aria-label="Location"
-              placeholder="City, neighborhood, or zip code"
-              className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl py-4 pl-12 pr-4 text-body-md text-on-surface placeholder:text-on-surface-variant/70 focus:border-brand focus:ring-1 focus:ring-brand outline-none transition-colors shadow-sm"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="Search for a city or location..."
+              aria-label="Search for a city or location"
+              className="flex-1 px-4 py-2.5 rounded-lg border border-surface-container-high bg-surface-container-lowest text-on-surface placeholder-on-surface/50 font-body-md focus:outline-none focus:ring-2 focus:ring-brand"
             />
+            <button
+              type="submit"
+              disabled={isSearching}
+              aria-label="Search location"
+              className="px-4 py-2.5 rounded-lg bg-brand text-on-brand font-label-md hover:opacity-90 disabled:opacity-50 transition-opacity"
+            >
+              <span className="material-symbols-outlined text-[20px]">search</span>
+            </button>
+          </form>
+          <div
+            ref={mapContainerRef}
+            className="w-full h-80 rounded-2xl shadow-md overflow-hidden border border-surface-container-high"
+          />
+          {selectedLocation && (
+            <div className="p-4 rounded-lg bg-surface-container-lowest border border-surface-container-high shadow-sm">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="material-symbols-outlined text-brand text-[20px]">location_on</span>
+                <p className="font-label-lg text-label-lg text-on-surface font-semibold">
+                  Selected Location
+                </p>
+              </div>
+              <p className="text-body-sm text-on-surface/70 line-clamp-2">{selectedLocation.name}</p>
+              <p className="text-label-sm text-on-surface/50 mt-2">
+                Coordinates: {selectedLocation.lat.toFixed(4)}, {selectedLocation.lon.toFixed(4)}
+              </p>
+            </div>
+          )}
+        </section>
+
+        {/* Bio Section */}
+        <section className="bg-surface-container-lowest rounded-[24px] p-stack-md shadow-[0_8px_30px_rgba(169,51,73,0.06)] flex flex-col gap-stack-sm">
+          <h3 className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">
+            About Me
+          </h3>
+          <textarea
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
+            placeholder="Tell us about yourself..."
+            maxLength={500}
+            className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl p-4 text-body-md text-on-surface placeholder-on-surface-variant/50 font-body-md focus:outline-none focus:ring-2 focus:ring-brand resize-none"
+            rows={5}
+          />
+          <p className="text-label-sm text-on-surface-variant/70">{bio.length}/500</p>
+        </section>
+
+        {/* Interests Section */}
+        <section className="bg-surface-container-lowest rounded-[24px] p-stack-md shadow-[0_8px_30px_rgba(169,51,73,0.06)] flex flex-col gap-stack-sm">
+          <h3 className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">
+            Interests
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {interestsList.map((interest) => (
+              <button
+                key={interest}
+                onClick={() => {
+                  setSelectedInterests((prev) =>
+                    prev.includes(interest)
+                      ? prev.filter((i) => i !== interest)
+                      : [...prev, interest]
+                  );
+                }}
+                className={`px-4 py-2 rounded-full font-label-md text-label-md transition-all ${
+                  selectedInterests.includes(interest)
+                    ? "bg-brand text-on-brand shadow-md"
+                    : "bg-surface-container-high text-on-surface border border-outline-variant hover:bg-surface-container-highest"
+                }`}
+              >
+                {interest}
+              </button>
+            ))}
           </div>
-          <div className="flex gap-gutter overflow-x-auto pb-2 mt-2 snap-x hide-scrollbar">
-            {suggestions.map((suggestion) => {
-              const active = location === suggestion;
-              return (
+        </section>
+
+        {/* Lifestyle Match Section */}
+        <section className="bg-surface-container-lowest rounded-[24px] p-stack-md shadow-[0_8px_30px_rgba(169,51,73,0.06)] flex flex-col gap-stack-sm">
+          <h3 className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">
+            Lifestyle Match
+          </h3>
+
+          {/* Sleep Schedule */}
+          <Collapsible>
+            <CollapsibleTrigger className="flex items-center justify-between w-full p-4 rounded-lg border border-outline-variant hover:bg-surface-container-high transition-colors">
+              <span className="font-label-lg text-label-lg text-on-surface">Sleep Schedule</span>
+              <span className="material-symbols-outlined">expand_more</span>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="pt-2 space-y-2">
+              {["Early Bird", "Night Owl"].map((option) => (
                 <button
-                  key={suggestion}
-                  type="button"
-                  onClick={() => setLocation(suggestion)}
-                  className={`whitespace-nowrap px-4 py-2 rounded-full font-label-md text-label-md transition-colors snap-start border ${
-                    active
-                      ? "bg-primary-container/10 text-brand border-brand/20 hover:bg-primary-container/20"
-                      : "bg-surface-container border-outline-variant text-on-surface-variant hover:bg-surface-container-high"
+                  key={option}
+                  onClick={() => setSleepSchedule(option)}
+                  className={`w-full px-4 py-3 rounded-lg font-body-md transition-all ${
+                    sleepSchedule === option
+                      ? "bg-brand text-on-brand"
+                      : "bg-surface-container-highest text-on-surface border border-outline-variant hover:bg-surface-container-high"
                   }`}
                 >
-                  {suggestion}
+                  {option}
                 </button>
-              );
-            })}
-          </div>
+              ))}
+            </CollapsibleContent>
+          </Collapsible>
+
+          {/* Cleanliness */}
+          <Collapsible>
+            <CollapsibleTrigger className="flex items-center justify-between w-full p-4 rounded-lg border border-outline-variant hover:bg-surface-container-high transition-colors">
+              <span className="font-label-lg text-label-lg text-on-surface">Cleanliness</span>
+              <span className="material-symbols-outlined">expand_more</span>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="pt-2 space-y-2">
+              {["Strictly clean", "Tidy", "Relaxed"].map((option) => (
+                <button
+                  key={option}
+                  onClick={() => setCleanliness(option)}
+                  className={`w-full px-4 py-3 rounded-lg font-body-md transition-all ${
+                    cleanliness === option
+                      ? "bg-brand text-on-brand"
+                      : "bg-surface-container-highest text-on-surface border border-outline-variant hover:bg-surface-container-high"
+                  }`}
+                >
+                  {option}
+                </button>
+              ))}
+            </CollapsibleContent>
+          </Collapsible>
+
+          {/* Social Level */}
+          <Collapsible>
+            <CollapsibleTrigger className="flex items-center justify-between w-full p-4 rounded-lg border border-outline-variant hover:bg-surface-container-high transition-colors">
+              <span className="font-label-lg text-label-lg text-on-surface">Social Level</span>
+              <span className="material-symbols-outlined">expand_more</span>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="pt-2 space-y-2">
+              {["Introvert", "Values Quiet", "Party Host"].map((option) => (
+                <button
+                  key={option}
+                  onClick={() => setSocialLevel(option)}
+                  className={`w-full px-4 py-3 rounded-lg font-body-md transition-all ${
+                    socialLevel === option
+                      ? "bg-brand text-on-brand"
+                      : "bg-surface-container-highest text-on-surface border border-outline-variant hover:bg-surface-container-high"
+                  }`}
+                >
+                  {option}
+                </button>
+              ))}
+            </CollapsibleContent>
+          </Collapsible>
+
+          {/* Guests */}
+          <Collapsible>
+            <CollapsibleTrigger className="flex items-center justify-between w-full p-4 rounded-lg border border-outline-variant hover:bg-surface-container-high transition-colors">
+              <span className="font-label-lg text-label-lg text-on-surface">Guests</span>
+              <span className="material-symbols-outlined">expand_more</span>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="pt-2 space-y-2">
+              {["No guests", "Occasional", "Weekends mostly"].map((option) => (
+                <button
+                  key={option}
+                  onClick={() => setGuests(option)}
+                  className={`w-full px-4 py-3 rounded-lg font-body-md transition-all ${
+                    guests === option
+                      ? "bg-brand text-on-brand"
+                      : "bg-surface-container-highest text-on-surface border border-outline-variant hover:bg-surface-container-high"
+                  }`}
+                >
+                  {option}
+                </button>
+              ))}
+            </CollapsibleContent>
+          </Collapsible>
         </section>
 
         <section className="bg-surface-container-lowest rounded-[24px] p-stack-md shadow-[0_8px_30px_rgba(169,51,73,0.06)] flex flex-col gap-stack-sm">
@@ -105,9 +334,7 @@ function Profile() {
             <h3 className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">
               Monthly Budget
             </h3>
-            <span className="font-headline-md text-headline-md text-brand">
-              ${budget.toLocaleString()}
-            </span>
+            <span className="font-headline-md text-headline-md text-brand">${budget}</span>
           </div>
           <div className="pt-4 pb-2">
             <input
