@@ -2,13 +2,14 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { TopAppBar } from "../components/TopAppBar";
 import { BottomNav } from "../components/BottomNav";
-import L from "leaflet";
+import type * as L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+
 
 export const Route = createFileRoute("/profile")({
   head: () => ({
@@ -47,7 +48,9 @@ function Profile() {
   const [cleanliness, setCleanliness] = useState<string>("");
   const [socialLevel, setSocialLevel] = useState<string>("");
   const [guests, setGuests] = useState<string>("");
+  const leafletRef = useRef<typeof import("leaflet") | null>(null);
   const mapRef = useRef<L.Map | null>(null);
+
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const markerRef = useRef<L.Marker | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -66,19 +69,27 @@ function Profile() {
   ];
 
   useEffect(() => {
-    if (!mapContainerRef.current || mapRef.current) return;
-
-    mapRef.current = L.map(mapContainerRef.current).setView([40.7128, -74.006], 13);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "© OpenStreetMap contributors",
-      maxZoom: 19,
-    }).addTo(mapRef.current);
+    let cancelled = false;
+    void (async () => {
+      const leaflet = (await import("leaflet")).default;
+      if (cancelled || !mapContainerRef.current || mapRef.current) return;
+      leafletRef.current = leaflet;
+      mapRef.current = leaflet.map(mapContainerRef.current).setView([40.7128, -74.006], 13);
+      leaflet
+        .tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution: "© OpenStreetMap contributors",
+          maxZoom: 19,
+        })
+        .addTo(mapRef.current);
+    })();
 
     return () => {
+      cancelled = true;
       mapRef.current?.remove();
       mapRef.current = null;
     };
   }, []);
+
 
   const searchLocation = async (query: string) => {
     if (!query.trim()) return;
@@ -97,11 +108,12 @@ function Profile() {
       const lon = parseFloat(result.lon);
       setSelectedLocation({ name: result.display_name, lat, lon });
 
-      if (mapRef.current) {
+      if (mapRef.current && leafletRef.current) {
         mapRef.current.setView([lat, lon], 13);
         markerRef.current?.remove();
-        markerRef.current = L.marker([lat, lon]).addTo(mapRef.current);
+        markerRef.current = leafletRef.current.marker([lat, lon]).addTo(mapRef.current);
       }
+
     } catch (error) {
       console.error("Error searching location:", error);
     } finally {
