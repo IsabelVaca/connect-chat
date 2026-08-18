@@ -28,7 +28,7 @@ function Discovery() {
 
   // We cycle specifically through the 3 main users: Alex, David, Sarah
   const discoveryUsers = userProfiles.slice(0, 3);
-  const currentUser = discoveryUsers[discoveryIndex];
+  const currentUser = discoveryUsers[discoveryIndex]!;
 
   const cycleProfile = () => {
     setDiscoveryIndex((prev) => (prev + 1) % discoveryUsers.length);

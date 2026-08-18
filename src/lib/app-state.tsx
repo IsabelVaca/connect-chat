@@ -65,7 +65,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
             lastMessage: "",
             when: "Just now",
             online: true,
-            verified: profile.verified,
+            ...(profile.verified !== undefined ? { verified: profile.verified } : {}),
           };
           return [newContact, ...prev];
         });
