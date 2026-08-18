@@ -48,7 +48,9 @@ function Profile() {
   const [cleanliness, setCleanliness] = useState<string>("");
   const [socialLevel, setSocialLevel] = useState<string>("");
   const [guests, setGuests] = useState<string>("");
+  const leafletRef = useRef<typeof import("leaflet") | null>(null);
   const mapRef = useRef<L.Map | null>(null);
+
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const markerRef = useRef<L.Marker | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
