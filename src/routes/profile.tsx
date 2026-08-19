@@ -6,12 +6,7 @@ import { fetchCurrentProfile, updateProfile } from "@/lib/profile-api";
 
 import type * as L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({
@@ -163,14 +158,13 @@ function Profile() {
     }
   };
 
-
   const searchLocation = async (query: string) => {
     if (!query.trim()) return;
 
     setIsSearching(true);
     try {
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`,
       );
       const data = await response.json();
 
@@ -186,7 +180,6 @@ function Profile() {
         markerRef.current?.remove();
         markerRef.current = leafletRef.current.marker([lat, lon]).addTo(mapRef.current);
       }
-
     } catch (error) {
       console.error("Error searching location:", error);
     } finally {
@@ -233,12 +226,16 @@ function Profile() {
           {selectedLocation && (
             <div className="p-4 rounded-lg bg-surface-container-lowest border border-surface-container-high shadow-sm">
               <div className="flex items-center gap-2 mb-1">
-                <span className="material-symbols-outlined text-brand text-[20px]">location_on</span>
+                <span className="material-symbols-outlined text-brand text-[20px]">
+                  location_on
+                </span>
                 <p className="font-label-lg text-label-lg text-on-surface font-semibold">
                   Selected Location
                 </p>
               </div>
-              <p className="text-body-sm text-on-surface/70 line-clamp-2">{selectedLocation.name}</p>
+              <p className="text-body-sm text-on-surface/70 line-clamp-2">
+                {selectedLocation.name}
+              </p>
               <p className="text-label-sm text-on-surface/50 mt-2">
                 Coordinates: {selectedLocation.lat.toFixed(4)}, {selectedLocation.lon.toFixed(4)}
               </p>
@@ -275,7 +272,7 @@ function Profile() {
                   setSelectedInterests((prev) =>
                     prev.includes(interest)
                       ? prev.filter((i) => i !== interest)
-                      : [...prev, interest]
+                      : [...prev, interest],
                   );
                 }}
                 className={`px-4 py-2 rounded-full font-label-md text-label-md transition-all ${
@@ -498,7 +495,11 @@ function Profile() {
           </label>
           <label className="flex flex-col gap-2">
             <span className="font-label-md text-label-md text-on-surface">Profile Image</span>
-            {!profileImage && <span className="text-body-sm italic text-on-surface-variant">Sin archivos adjuntos.</span>}
+            {!profileImage && (
+              <span className="text-body-sm italic text-on-surface-variant">
+                Sin archivos adjuntos.
+              </span>
+            )}
             <input
               ref={fileInputRef}
               type="file"
@@ -518,7 +519,11 @@ function Profile() {
               Adjuntar archivo
             </button>
             {profileImage && (
-              <img src={profileImage} alt="Profile preview" className="h-24 w-24 rounded-full object-cover" />
+              <img
+                src={profileImage}
+                alt="Profile preview"
+                className="h-24 w-24 rounded-full object-cover"
+              />
             )}
           </label>
         </section>
@@ -547,7 +552,6 @@ function Profile() {
             <span className="material-symbols-outlined">arrow_forward</span>
           </button>
         </div>
-
       </div>
       <BottomNav />
     </div>

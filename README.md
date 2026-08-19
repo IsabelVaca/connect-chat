@@ -7,7 +7,7 @@ Build this app using the HTML files referenced below. You can hotlink the images
 3. https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ7Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpaCiVodG1sXzAwMDY1OGNmNDQyMTlmOWQwMWE2MzJkMWQyMGRmZTQ1EgsSBxDXnfnimA8YAZIBIwoKcHJvamVjdF9pZBIVQhMxNzAwMjk1Mjg5NTEwOTE0MzY0&filename=&opi=89354086
 4. https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ7Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpaCiVodG1sXzAwMDY1OGNmNDM4MTJlODMwN2M0ZDhhZTRkMDUxYjVhEgsSBxDXnfnimA8YAZIBIwoKcHJvamVjdF9pZBIVQhMxNzAwMjk1Mjg5NTEwOTE0MzY0&filename=&opi=89354086 I want to make a few adjustments to the application while keeping the exact visual style, colors, typography, spacing, and existing components. Do not redesign the application or change anything that is unrelated to these instructions.
 
-1. Chat Screen — Open a Conversation When Selecting a Contact
+5. Chat Screen — Open a Conversation When Selecting a Contact
 
 On the Chat screen, there is currently a list of contacts/conversations.
 

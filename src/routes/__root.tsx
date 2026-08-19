@@ -81,7 +81,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "RoomieMatch — Find your ideal roommate" },
       {
         name: "description",
-        content: "Discover compatible roommates, chat with your matches, and set your housing preferences.",
+        content:
+          "Discover compatible roommates, chat with your matches, and set your housing preferences.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -160,4 +161,3 @@ function RootComponent() {
     </QueryClientProvider>
   );
 }
-

@@ -1,4 +1,5 @@
 <!-- LOVABLE:BEGIN -->
+
 > [!IMPORTANT]
 > This project is connected to [Lovable](https://lovable.dev). Avoid rewriting
 > published git history — force pushing, or rebasing/amending/squashing commits
@@ -65,4 +66,5 @@
 - Keep changes focused on the requested task.
 - Do not create commits unless explicitly requested.
 - Never rewrite published Git history.
+
 <!-- LOVABLE:END -->
