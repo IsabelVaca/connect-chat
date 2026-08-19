@@ -197,7 +197,7 @@ function Profile() {
   return (
     <div className="min-h-screen flex flex-col bg-surface text-on-surface">
       <TopAppBar />
-      <main className="flex-grow px-container-margin py-stack-md flex flex-col gap-stack-lg max-w-[600px] mx-auto w-full pb-56">
+      <main className="flex-grow px-container-margin py-stack-md flex flex-col gap-stack-lg max-w-[600px] mx-auto w-full pb-72">
         {/* Location Section */}
         <section className="flex flex-col gap-stack-md">
           <h2 className="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">
