@@ -2,6 +2,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { TopAppBar } from "../components/TopAppBar";
 import { BottomNav } from "../components/BottomNav";
+import { fetchCurrentProfile, updateProfile } from "@/lib/profile-api";
+
 import type * as L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import {
@@ -95,6 +97,72 @@ function Profile() {
     };
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const profile = await fetchCurrentProfile();
+        if (cancelled) return;
+        if (!profile) {
+          setSaveStatus("No hay perfiles en la tabla todavía");
+          return;
+        }
+
+        setProfileId(profile.id);
+        setFullName(profile.name ?? "");
+        setAge(profile.age !== null && profile.age !== undefined ? String(profile.age) : "");
+        setProfileImage(profile.avatar_url ?? "");
+        setBio(profile.bio ?? "");
+        setSelectedInterests(profile.interests ?? []);
+        if (profile.city) {
+          setSearchQuery(profile.city);
+          setSelectedLocation({ name: profile.city, lat: 0, lon: 0 });
+        }
+        const lifestyle = profile.lifestyle ?? {};
+        setSleepSchedule(lifestyle.sleepSchedule ?? "");
+        setCleanliness(lifestyle.cleanliness ?? "");
+        setSocialLevel(lifestyle.socialLevel ?? "");
+        setGuests(lifestyle.guests ?? "");
+        if (typeof lifestyle.budget === "number") setBudget(lifestyle.budget);
+      } catch (error) {
+        console.error("Error loading profile:", error);
+        if (!cancelled) setSaveStatus("No se pudo cargar el perfil");
+      } finally {
+        if (!cancelled) setIsLoadingProfile(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const handleSave = async () => {
+    if (!profileId) {
+      setSaveStatus("No hay perfil disponible para guardar");
+      return;
+    }
+    setIsSaving(true);
+    setSaveStatus("");
+    try {
+      await updateProfile(profileId, {
+        name: fullName || null,
+        age: age ? Number(age) : null,
+        city: selectedLocation?.name ?? searchQuery ?? null,
+        avatar_url: profileImage || null,
+        bio: bio || null,
+        interests: selectedInterests,
+        lifestyle: { sleepSchedule, cleanliness, socialLevel, guests, budget },
+      });
+      setSaveStatus("Cambios guardados");
+    } catch (error) {
+      console.error("Error saving profile:", error);
+      setSaveStatus("No se pudieron guardar los cambios");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
 
   const searchLocation = async (query: string) => {
     if (!query.trim()) return;
@@ -134,7 +202,7 @@ function Profile() {
   return (
     <div className="min-h-screen flex flex-col bg-surface text-on-surface">
       <TopAppBar />
-      <main className="flex-grow px-container-margin py-stack-md flex flex-col gap-stack-lg max-w-[600px] mx-auto w-full pb-56">
+      <main className="flex-grow px-container-margin py-stack-md flex flex-col gap-stack-lg max-w-[600px] mx-auto w-full pb-72">
         {/* Location Section */}
         <section className="flex flex-col gap-stack-md">
           <h2 className="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">
@@ -457,7 +525,19 @@ function Profile() {
       </main>
 
       <div className="fixed bottom-[88px] left-0 w-full bg-surface/90 backdrop-blur-md border-t border-surface-container p-container-margin z-40">
-        <div className="max-w-[600px] mx-auto">
+        <div className="max-w-[600px] mx-auto flex flex-col gap-2">
+          {saveStatus && (
+            <p className="text-label-sm text-on-surface-variant text-center">{saveStatus}</p>
+          )}
+          <button
+            type="button"
+            onClick={() => void handleSave()}
+            disabled={isSaving || isLoadingProfile}
+            className="w-full border border-brand text-brand font-label-lg text-label-lg py-3 rounded-xl hover:bg-primary-container/10 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+          >
+            <span className="material-symbols-outlined">save</span>
+            {isSaving ? "Guardando..." : "Guardar cambios"}
+          </button>
           <button
             type="button"
             onClick={() => navigate({ to: "/" })}
@@ -467,6 +547,7 @@ function Profile() {
             <span className="material-symbols-outlined">arrow_forward</span>
           </button>
         </div>
+
       </div>
       <BottomNav />
     </div>
