@@ -2,6 +2,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { TopAppBar } from "../components/TopAppBar";
 import { BottomNav } from "../components/BottomNav";
+import { fetchCurrentProfile, updateProfile } from "@/lib/profile-api";
+
 import type * as L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import {
