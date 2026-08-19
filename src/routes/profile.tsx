@@ -102,7 +102,12 @@ function Profile() {
     void (async () => {
       try {
         const profile = await fetchCurrentProfile();
-        if (cancelled || !profile) return;
+        if (cancelled) return;
+        if (!profile) {
+          setSaveStatus("No hay perfiles en la tabla todavía");
+          return;
+        }
+
         setProfileId(profile.id);
         setFullName(profile.name ?? "");
         setAge(profile.age !== null && profile.age !== undefined ? String(profile.age) : "");
