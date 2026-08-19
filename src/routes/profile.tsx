@@ -95,6 +95,67 @@ function Profile() {
     };
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const profile = await fetchCurrentProfile();
+        if (cancelled || !profile) return;
+        setProfileId(profile.id);
+        setFullName(profile.name ?? "");
+        setAge(profile.age !== null && profile.age !== undefined ? String(profile.age) : "");
+        setProfileImage(profile.avatar_url ?? "");
+        setBio(profile.bio ?? "");
+        setSelectedInterests(profile.interests ?? []);
+        if (profile.city) {
+          setSearchQuery(profile.city);
+          setSelectedLocation({ name: profile.city, lat: 0, lon: 0 });
+        }
+        const lifestyle = profile.lifestyle ?? {};
+        setSleepSchedule(lifestyle.sleepSchedule ?? "");
+        setCleanliness(lifestyle.cleanliness ?? "");
+        setSocialLevel(lifestyle.socialLevel ?? "");
+        setGuests(lifestyle.guests ?? "");
+        if (typeof lifestyle.budget === "number") setBudget(lifestyle.budget);
+      } catch (error) {
+        console.error("Error loading profile:", error);
+        if (!cancelled) setSaveStatus("No se pudo cargar el perfil");
+      } finally {
+        if (!cancelled) setIsLoadingProfile(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const handleSave = async () => {
+    if (!profileId) {
+      setSaveStatus("No hay perfil disponible para guardar");
+      return;
+    }
+    setIsSaving(true);
+    setSaveStatus("");
+    try {
+      await updateProfile(profileId, {
+        name: fullName || null,
+        age: age ? Number(age) : null,
+        city: selectedLocation?.name ?? searchQuery ?? null,
+        avatar_url: profileImage || null,
+        bio: bio || null,
+        interests: selectedInterests,
+        lifestyle: { sleepSchedule, cleanliness, socialLevel, guests, budget },
+      });
+      setSaveStatus("Cambios guardados");
+    } catch (error) {
+      console.error("Error saving profile:", error);
+      setSaveStatus("No se pudieron guardar los cambios");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
 
   const searchLocation = async (query: string) => {
     if (!query.trim()) return;
