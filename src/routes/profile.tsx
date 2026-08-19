@@ -520,7 +520,19 @@ function Profile() {
       </main>
 
       <div className="fixed bottom-[88px] left-0 w-full bg-surface/90 backdrop-blur-md border-t border-surface-container p-container-margin z-40">
-        <div className="max-w-[600px] mx-auto">
+        <div className="max-w-[600px] mx-auto flex flex-col gap-2">
+          {saveStatus && (
+            <p className="text-label-sm text-on-surface-variant text-center">{saveStatus}</p>
+          )}
+          <button
+            type="button"
+            onClick={() => void handleSave()}
+            disabled={isSaving || isLoadingProfile}
+            className="w-full border border-brand text-brand font-label-lg text-label-lg py-3 rounded-xl hover:bg-primary-container/10 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+          >
+            <span className="material-symbols-outlined">save</span>
+            {isSaving ? "Guardando..." : "Guardar cambios"}
+          </button>
           <button
             type="button"
             onClick={() => navigate({ to: "/" })}
@@ -530,6 +542,7 @@ function Profile() {
             <span className="material-symbols-outlined">arrow_forward</span>
           </button>
         </div>
+
       </div>
       <BottomNav />
     </div>
