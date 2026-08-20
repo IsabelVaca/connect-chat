@@ -469,8 +469,9 @@ function Profile() {
 
         <section className="bg-surface-container-lowest rounded-[24px] p-stack-md shadow-[0_8px_30px_rgba(169,51,73,0.06)] flex flex-col gap-stack-sm">
           <h3 className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">
-            Personal Information
+            Información de la cuenta
           </h3>
+
           <label className="flex flex-col gap-2">
             <span className="font-label-md text-label-md text-on-surface">Full Name</span>
             <input
