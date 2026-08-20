@@ -1,9 +1,9 @@
 import { Link } from "@tanstack/react-router";
 
 const items = [
-  { to: "/", icon: "explore", label: "Discovery" },
+  { to: "/", icon: "explore", label: "Descubrir" },
   { to: "/matches", icon: "chat_bubble", label: "Matches" },
-  { to: "/profile", icon: "person", label: "Profile" },
+  { to: "/profile", icon: "person", label: "Perfil" },
 ] as const;
 
 export function BottomNav() {
