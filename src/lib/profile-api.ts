@@ -53,6 +53,26 @@ export async function fetchCurrentProfile(): Promise<ProfileRow | null> {
   return (data as ProfileRow | null) ?? null;
 }
 
+/**
+ * Dev-only credential check against the `profiles` table (see the UserSwitcher
+ * "test tool" note in the UI) — not real authentication. Requires the
+ * `username`/`password` columns to already exist on `profiles`.
+ */
+export async function signInWithUsernamePassword(
+  username: string,
+  password: string,
+): Promise<ProfileRow> {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select(`${PROFILE_COLUMNS}, username, password`)
+    .eq("username", username)
+    .eq("password", password)
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) throw new Error("Usuario o contraseña incorrectos.");
+  return data as ProfileRow;
+}
+
 export async function fetchAllProfiles(): Promise<ProfileRow[]> {
   const { data, error } = await supabase
     .from("profiles")
