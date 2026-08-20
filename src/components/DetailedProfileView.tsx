@@ -18,7 +18,7 @@ export function DetailedProfileView({ profile, onClose, onMessage }: DetailedPro
         <button
           onClick={onClose}
           className="hidden md:flex absolute top-6 left-6 z-50 items-center justify-center w-10 h-10 rounded-full bg-surface-container-lowest/80 backdrop-blur-md text-on-surface hover:bg-surface-container-high transition-colors shadow-md border border-outline-variant/30 cursor-pointer"
-          aria-label="Close profile"
+          aria-label="Cerrar perfil"
         >
           <span className="material-symbols-outlined">close</span>
         </button>
@@ -28,14 +28,14 @@ export function DetailedProfileView({ profile, onClose, onMessage }: DetailedPro
           <button
             onClick={onClose}
             className="material-symbols-outlined text-on-surface p-2 -ml-2 rounded-full hover:bg-surface-container-low transition-colors cursor-pointer"
-            aria-label="Back"
+            aria-label="Volver"
           >
             arrow_back
           </button>
-          <span className="font-label-md text-label-md font-semibold">Profile</span>
+          <span className="font-label-md text-label-md font-semibold">Perfil</span>
           <button
             className="material-symbols-outlined text-on-surface p-2 -mr-2 rounded-full hover:bg-surface-container-low transition-colors"
-            aria-label="More options"
+            aria-label="Más opciones"
           >
             more_vert
           </button>
@@ -45,7 +45,7 @@ export function DetailedProfileView({ profile, onClose, onMessage }: DetailedPro
         <div className="relative w-full h-80 md:h-96">
           <img
             className="w-full h-full object-cover"
-            alt={`A bright, high-quality portrait of ${profile.name}`}
+            alt={`Retrato de ${profile.name}`}
             src={profile.photo}
           />
 
@@ -83,7 +83,7 @@ export function DetailedProfileView({ profile, onClose, onMessage }: DetailedPro
               {profile.verified && (
                 <span
                   className="material-symbols-outlined text-secondary-fixed-dim icon-filled text-xl"
-                  title="Verified User"
+                  title="Usuario verificado"
                 >
                   verified
                 </span>
@@ -96,7 +96,7 @@ export function DetailedProfileView({ profile, onClose, onMessage }: DetailedPro
               </span>
               <span className="flex items-center gap-1">
                 <span className="material-symbols-outlined text-lg">payments</span> ${profile.rent}
-                /mo
+                /mes
               </span>
             </div>
           </div>
@@ -105,7 +105,7 @@ export function DetailedProfileView({ profile, onClose, onMessage }: DetailedPro
         <div className="p-container-margin md:p-stack-md flex flex-col gap-stack-md">
           {/* Bio */}
           <section>
-            <h2 className="font-headline-md text-headline-md text-on-surface mb-base">About Me</h2>
+            <h2 className="font-headline-md text-headline-md text-on-surface mb-base">Sobre mí</h2>
             <p className="font-body-lg text-body-lg text-on-surface-variant leading-relaxed">
               "{profile.bio}"
             </p>
@@ -116,7 +116,7 @@ export function DetailedProfileView({ profile, onClose, onMessage }: DetailedPro
           {/* Interests Grid */}
           <section>
             <h2 className="font-headline-md text-headline-md text-on-surface mb-stack-sm">
-              Interests
+              Intereses
             </h2>
             <div className="flex flex-wrap gap-2">
               {profile.interests.map((interest, idx) => {
@@ -141,7 +141,7 @@ export function DetailedProfileView({ profile, onClose, onMessage }: DetailedPro
           {/* Lifestyle Grid */}
           <section>
             <h2 className="font-headline-md text-headline-md text-on-surface mb-stack-sm">
-              Lifestyle Match
+              Estilo de vida
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {profile.lifestyle.map((item) => (
@@ -183,11 +183,11 @@ export function DetailedProfileView({ profile, onClose, onMessage }: DetailedPro
               <section>
                 <div className="flex items-center justify-between mb-stack-sm">
                   <h2 className="font-headline-md text-headline-md text-on-surface">
-                    Current Apartment
+                    Departamento actual
                   </h2>
                   {profile.hasRoom && (
                     <span className="text-brand font-label-md text-label-md font-semibold">
-                      Has a room available
+                      Tiene cuarto disponible
                     </span>
                   )}
                 </div>
@@ -195,20 +195,20 @@ export function DetailedProfileView({ profile, onClose, onMessage }: DetailedPro
                 <div className="grid grid-cols-2 gap-2 rounded-xl overflow-hidden">
                   <img
                     className="w-full h-32 md:h-48 object-cover rounded-l-xl"
-                    alt={`${profile.name}'s living room`}
+                    alt={`Sala de ${profile.name}`}
                     src={profile.apartmentPhotos[0]}
                   />
                   {profile.apartmentPhotos.length > 1 && (
                     <div className="grid grid-rows-2 gap-2">
                       <img
                         className="w-full h-[60px] md:h-[92px] object-cover rounded-tr-xl"
-                        alt={`${profile.name}'s kitchen`}
+                        alt={`Cocina de ${profile.name}`}
                         src={profile.apartmentPhotos[1]}
                       />
                       {profile.apartmentPhotos.length > 2 ? (
                         <img
                           className="w-full h-[60px] md:h-[92px] object-cover rounded-br-xl"
-                          alt={`${profile.name}'s bedroom`}
+                          alt={`Recámara de ${profile.name}`}
                           src={profile.apartmentPhotos[2]}
                         />
                       ) : (
@@ -229,7 +229,7 @@ export function DetailedProfileView({ profile, onClose, onMessage }: DetailedPro
             className="w-full md:w-auto md:min-w-[300px] h-12 rounded-full bg-gradient-to-r from-brand to-primary-container text-on-brand font-label-md text-label-md shadow-lg hover:scale-105 transition-transform duration-200 flex items-center justify-center gap-2 cursor-pointer"
           >
             <span className="material-symbols-outlined">chat</span>
-            Message {profile.name}
+            Enviar mensaje a {profile.name}
           </button>
         </div>
       </div>

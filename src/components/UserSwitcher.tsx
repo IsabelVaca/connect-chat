@@ -28,13 +28,13 @@ export function UserSwitcher() {
     <>
       <button
         onClick={() => setOpen(true)}
-        aria-label="Switch active profile (test tool)"
+        aria-label="Cambiar de perfil"
         className="w-10 h-10 rounded-full overflow-hidden border border-outline-variant bg-surface-container-low flex items-center justify-center text-on-surface-variant font-label-md text-label-md hover:opacity-80 transition-opacity"
       >
         {activeProfile?.avatar_url ? (
           <img
             src={avatarFor(activeProfile)}
-            alt={`${activeProfile.name ?? "Roomie"}'s avatar`}
+            alt={`Avatar de ${activeProfile.name ?? "Roomie"}`}
             className="w-full h-full object-cover"
           />
         ) : (
@@ -45,7 +45,7 @@ export function UserSwitcher() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Cambiar de perfil (prueba)</DialogTitle>
+            <DialogTitle>Cambiar de perfil</DialogTitle>
           </DialogHeader>
           <p className="text-label-sm text-on-surface-variant -mt-2">
             Herramienta de prueba: cambia qué perfil usa la app localmente, sin afectar tu sesión
@@ -67,7 +67,7 @@ export function UserSwitcher() {
               >
                 <img
                   src={avatarFor(profile)}
-                  alt={`${profile.name ?? "Roomie"}'s avatar`}
+                  alt={`Avatar de ${profile.name ?? "Roomie"}`}
                   className="w-10 h-10 rounded-full object-cover"
                 />
                 <span className="font-label-md text-label-md text-on-surface">

@@ -33,12 +33,12 @@ export const Route = createFileRoute("/matches/$contactId")({
   head: ({ loaderData }) => {
     if (!loaderData) {
       return {
-        meta: [{ title: "Conversation — RoomieMatch" }, { name: "robots", content: "noindex" }],
+        meta: [{ title: "Conversación — RoomieMatch" }, { name: "robots", content: "noindex" }],
       };
     }
     const name = loaderData.otherProfile.name ?? "Roomie";
-    const title = `Chat with ${name} — RoomieMatch`;
-    const description = `Your conversation with ${name} on RoomieMatch.`;
+    const title = `Chat con ${name} — RoomieMatch`;
+    const description = `Tu conversación con ${name} en RoomieMatch.`;
     return {
       meta: [
         { title },
@@ -92,7 +92,7 @@ function Conversation() {
       <header className="sticky top-0 z-40 bg-surface-container-lowest/90 backdrop-blur-md px-container-margin h-16 flex items-center gap-3 shadow-sm">
         <Link
           to="/matches"
-          aria-label="Back to matches"
+          aria-label="Volver a matches"
           className="material-symbols-outlined text-on-surface p-2 -ml-2 rounded-full hover:bg-surface-container-low transition-colors"
         >
           arrow_back
@@ -100,7 +100,7 @@ function Conversation() {
         <img
           className="w-10 h-10 rounded-full object-cover"
           src={avatarFor(otherProfile)}
-          alt={`${name}'s profile`}
+          alt={`Perfil de ${name}`}
         />
         <div className="min-w-0">
           <h1 className="font-label-md text-label-md text-on-surface truncate">{name}</h1>
@@ -144,13 +144,13 @@ function Conversation() {
           <input
             value={draft}
             onChange={(event) => setDraft(event.target.value)}
-            aria-label="Write a message"
-            placeholder={`Message ${name}...`}
+            aria-label="Escribe un mensaje"
+            placeholder={`Escribe a ${name}...`}
             className="flex-grow bg-surface-container-lowest border border-outline-variant rounded-xl py-3 px-4 text-body-md text-on-surface placeholder:text-on-surface-variant/70 focus:border-brand focus:ring-1 focus:ring-brand outline-none transition-colors"
           />
           <button
             type="submit"
-            aria-label="Send message"
+            aria-label="Enviar mensaje"
             className="w-12 h-12 flex-shrink-0 rounded-full bg-gradient-to-r from-brand to-primary-container text-on-brand shadow-[0_8px_25px_rgba(169,51,73,0.3)] flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
           >
             <span className="material-symbols-outlined icon-filled">send</span>
