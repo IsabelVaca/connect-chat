@@ -42,9 +42,8 @@ function Login() {
         <h2 className="font-headline-lg-mobile text-headline-lg-mobile text-on-surface text-center">
           Iniciar sesión
         </h2>
-        <p className="text-label-sm text-on-surface-variant text-center -mt-1">
-          Herramienta de prueba: valida usuario/contraseña contra los perfiles demo.
-        </p>
+
+
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-stack-sm mt-2">
           <label className="flex flex-col gap-2">
