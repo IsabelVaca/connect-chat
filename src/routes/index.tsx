@@ -1,11 +1,18 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { TopAppBar } from "../components/TopAppBar";
 import { BottomNav } from "../components/BottomNav";
 import { useAppState } from "../lib/app-state";
-import { supabase, type ProfileRow, type Lifestyle } from "@/integrations/supabase/client";
-import { fetchCurrentProfile } from "@/lib/profile-api";
-import type { UserProfile, LifestyleItem } from "../lib/mock-data";
+import { supabase } from "@/integrations/supabase/client";
+import { createMatchIfMutual, mapProfileRowToUserProfile } from "../lib/match-api";
+import type { UserProfile } from "../lib/mock-data";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -25,107 +32,32 @@ export const Route = createFileRoute("/")({
   component: Discovery,
 });
 
-function mapProfileRowToUserProfile(
-  profile: ProfileRow,
-  currentUserProfile: ProfileRow,
-): UserProfile {
-  const lifestyleItems: LifestyleItem[] = [];
-  const candidateLifestyle = profile.lifestyle ?? {};
-  const currentLifestyle = currentUserProfile.lifestyle ?? {};
-
-  if (candidateLifestyle.sleepSchedule) {
-    lifestyleItems.push({
-      label: "Sleep Schedule",
-      value: candidateLifestyle.sleepSchedule,
-      match: candidateLifestyle.sleepSchedule === currentLifestyle.sleepSchedule ? "Match" : "Okay",
-      icon: "bedtime",
-    });
-  }
-  if (candidateLifestyle.cleanliness) {
-    lifestyleItems.push({
-      label: "Cleanliness",
-      value: candidateLifestyle.cleanliness,
-      match: candidateLifestyle.cleanliness === currentLifestyle.cleanliness ? "Match" : "Okay",
-      icon: "cleaning_services",
-    });
-  }
-  if (candidateLifestyle.socialLevel) {
-    lifestyleItems.push({
-      label: "Social Level",
-      value: candidateLifestyle.socialLevel,
-      match: candidateLifestyle.socialLevel === currentLifestyle.socialLevel ? "Match" : "Okay",
-      icon: "groups",
-    });
-  }
-  if (candidateLifestyle.guests) {
-    lifestyleItems.push({
-      label: "Guests",
-      value: candidateLifestyle.guests,
-      match: candidateLifestyle.guests === currentLifestyle.guests ? "Match" : "Okay",
-      icon: "door_open",
-    });
-  }
-
-  // Calculate compatibility score
-  let matchesCount = 0;
-  let totalFields = 0;
-  const fields: (keyof Lifestyle)[] = ["sleepSchedule", "cleanliness", "socialLevel", "guests"];
-  fields.forEach((f) => {
-    if (candidateLifestyle[f] && currentLifestyle[f]) {
-      totalFields++;
-      if (candidateLifestyle[f] === currentLifestyle[f]) {
-        matchesCount++;
-      }
-    }
-  });
-
-  const compatibility =
-    totalFields > 0
-      ? Math.round(75 + (matchesCount / totalFields) * 25)
-      : Math.floor(Math.random() * 15) + 80;
-
-  return {
-    id: profile.id,
-    name: profile.name ?? "Roomie",
-    age: profile.age ?? 25,
-    location: profile.city ?? "Nearby",
-    rent: candidateLifestyle.budget ?? 1200,
-    compatibility,
-    photo: profile.avatar_url ?? `https://i.pravatar.cc/600?u=${profile.id}`,
-    bio: profile.bio ?? "No bio yet.",
-    interests: profile.interests ?? [],
-    lifestyle: lifestyleItems,
-    apartmentPhotos: [],
-    hasRoom: true,
-    verified: true,
-  };
-}
-
 function Discovery() {
-  const { setSelectedProfileId, startChat, addProfiles } = useAppState();
+  const { setSelectedProfileId, addProfiles, activeProfile } = useAppState();
+  const navigate = useNavigate();
   const [candidates, setCandidates] = useState<UserProfile[]>([]);
-  const [currentUserProfile, setCurrentUserProfile] = useState<ProfileRow | null>(null);
   const [discoveryIndex, setDiscoveryIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [matchedProfile, setMatchedProfile] = useState<UserProfile | null>(null);
 
   useEffect(() => {
+    if (!activeProfile) {
+      setIsLoading(true);
+      return;
+    }
+
     let active = true;
     const loadDiscovery = async () => {
       try {
         setIsLoading(true);
-        const currProfile = await fetchCurrentProfile();
-        if (!active) return;
-        if (!currProfile) {
-          setError("No se pudo cargar el perfil del usuario.");
-          setIsLoading(false);
-          return;
-        }
-        setCurrentUserProfile(currProfile);
+        setError(null);
 
-        if (!currProfile.city) {
-          setCandidates([]);
-          setIsLoading(false);
+        if (!activeProfile.city) {
+          if (active) {
+            setCandidates([]);
+            setIsLoading(false);
+          }
           return;
         }
 
@@ -133,7 +65,7 @@ function Discovery() {
         const { data: swipesData, error: swipesError } = await supabase
           .from("swipes")
           .select("to_user_id")
-          .eq("from_user_id", currProfile.id);
+          .eq("from_user_id", activeProfile.id);
 
         if (swipesError) throw swipesError;
         const swipedUserIds = new Set(swipesData?.map((s) => s.to_user_id) ?? []);
@@ -142,13 +74,13 @@ function Discovery() {
         const { data: profilesData, error: profilesError } = await supabase
           .from("profiles")
           .select("id, name, age, city, avatar_url, bio, interests, lifestyle")
-          .eq("city", currProfile.city)
-          .neq("id", currProfile.id);
+          .eq("city", activeProfile.city)
+          .neq("id", activeProfile.id);
 
         if (profilesError) throw profilesError;
 
         const filtered = (profilesData ?? []).filter((p) => !swipedUserIds.has(p.id));
-        const mapped = filtered.map((p) => mapProfileRowToUserProfile(p, currProfile));
+        const mapped = filtered.map((p) => mapProfileRowToUserProfile(p, activeProfile));
 
         // Add them to the app state so they can be viewed in DetailedProfileView overlay
         addProfiles(mapped);
@@ -172,39 +104,27 @@ function Discovery() {
     return () => {
       active = false;
     };
-  }, [addProfiles]);
+  }, [activeProfile, addProfiles]);
 
   const handleSwipe = async (action: "like" | "pass") => {
     const candidate = candidates[discoveryIndex];
-    if (!candidate || !currentUserProfile) return;
+    if (!candidate || !activeProfile) return;
 
     // Advance card index smoothly in the UI first
     setDiscoveryIndex((prev) => prev + 1);
 
     try {
       const { error } = await supabase.from("swipes").insert({
-        from_user_id: currentUserProfile.id,
+        from_user_id: activeProfile.id,
         to_user_id: candidate.id,
         action,
       });
       if (error) throw error;
 
-      // Check if it's a mutual match!
+      // Check if it's a mutual match! (persists a real row in `matches` if so)
       if (action === "like") {
-        const { data: mutualSwipe, error: matchError } = await supabase
-          .from("swipes")
-          .select("id")
-          .eq("from_user_id", candidate.id)
-          .eq("to_user_id", currentUserProfile.id)
-          .eq("action", "like")
-          .maybeSingle();
-
-        if (matchError) console.error("Error checking mutual swipe:", matchError);
-
-        if (mutualSwipe) {
-          // Add them to chat contacts in app state
-          startChat(candidate.id);
-        }
+        const match = await createMatchIfMutual(activeProfile.id, candidate.id);
+        if (match) setMatchedProfile(candidate);
       }
     } catch (err) {
       console.error("Error recording swipe:", err);
@@ -249,7 +169,7 @@ function Discovery() {
     );
   }
 
-  const hasNoCity = currentUserProfile && !currentUserProfile.city;
+  const hasNoCity = activeProfile && !activeProfile.city;
   const isOutOfCandidates = discoveryIndex >= candidates.length;
 
   if (hasNoCity) {
@@ -290,7 +210,7 @@ function Discovery() {
           <h2 className="font-headline-md text-headline-md text-on-surface mb-2">¡Todo al día!</h2>
           <p className="font-body-md text-body-md text-on-surface-variant/80 mb-6">
             ¡Has visto todos los perfiles disponibles en{" "}
-            <strong className="text-brand">{currentUserProfile?.city}</strong> por hoy!
+            <strong className="text-brand">{activeProfile?.city}</strong> por hoy!
           </p>
           <div className="flex flex-col gap-3 w-full">
             <Link
@@ -397,6 +317,41 @@ function Discovery() {
       </main>
       <div className="h-24" />
       <BottomNav />
+
+      <Dialog open={!!matchedProfile} onOpenChange={(open) => !open && setMatchedProfile(null)}>
+        <DialogContent className="text-center">
+          <DialogHeader>
+            <DialogTitle className="text-center font-headline-lg-mobile text-headline-lg-mobile text-brand">
+              ¡Es un Match! 🎉
+            </DialogTitle>
+          </DialogHeader>
+          {matchedProfile && (
+            <div className="flex flex-col items-center gap-3 py-2">
+              <img
+                src={matchedProfile.photo}
+                alt={`Foto de ${matchedProfile.name}`}
+                className="w-28 h-28 rounded-full object-cover border-4 border-brand shadow-lg"
+              />
+              <p className="font-body-md text-body-md text-on-surface-variant">
+                Tú y <span className="font-semibold text-on-surface">{matchedProfile.name}</span> se
+                gustaron mutuamente.
+              </p>
+            </div>
+          )}
+          <DialogFooter className="sm:justify-center">
+            <button
+              onClick={() => {
+                setMatchedProfile(null);
+                navigate({ to: "/matches" });
+              }}
+              className="w-full bg-brand text-on-brand font-label-lg text-label-lg py-3 rounded-xl hover:opacity-95 shadow-[0_8px_25px_rgba(169,51,73,0.2)] transition-all flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <span className="material-symbols-outlined">forum</span>
+              Ir a Matches
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

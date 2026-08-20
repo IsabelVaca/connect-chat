@@ -2,7 +2,9 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { TopAppBar } from "../components/TopAppBar";
 import { BottomNav } from "../components/BottomNav";
-import { fetchCurrentProfile, updateProfile } from "@/lib/profile-api";
+import { updateProfile } from "@/lib/profile-api";
+import { supabase } from "@/integrations/supabase/client";
+import { useAppState } from "../lib/app-state";
 
 import type * as L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -28,6 +30,7 @@ export const Route = createFileRoute("/profile")({
 
 function Profile() {
   const navigate = useNavigate();
+  const { activeProfile } = useAppState();
   const [budget, setBudget] = useState(1500);
   const [fullName, setFullName] = useState("");
   const [age, setAge] = useState("");
@@ -45,7 +48,6 @@ function Profile() {
   const [cleanliness, setCleanliness] = useState<string>("");
   const [socialLevel, setSocialLevel] = useState<string>("");
   const [guests, setGuests] = useState<string>("");
-  const [profileId, setProfileId] = useState<string | null>(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<string>("");
@@ -93,54 +95,46 @@ function Profile() {
   }, []);
 
   useEffect(() => {
-    let cancelled = false;
-    void (async () => {
-      try {
-        const profile = await fetchCurrentProfile();
-        if (cancelled) return;
-        if (!profile) {
-          setSaveStatus("No hay perfiles en la tabla todavía");
-          return;
-        }
+    if (!activeProfile) {
+      setIsLoadingProfile(true);
+      return;
+    }
 
-        setProfileId(profile.id);
-        setFullName(profile.name ?? "");
-        setAge(profile.age !== null && profile.age !== undefined ? String(profile.age) : "");
-        setProfileImage(profile.avatar_url ?? "");
-        setBio(profile.bio ?? "");
-        setSelectedInterests(profile.interests ?? []);
-        if (profile.city) {
-          setSearchQuery(profile.city);
-          setSelectedLocation({ name: profile.city, lat: 0, lon: 0 });
-        }
-        const lifestyle = profile.lifestyle ?? {};
-        setSleepSchedule(lifestyle.sleepSchedule ?? "");
-        setCleanliness(lifestyle.cleanliness ?? "");
-        setSocialLevel(lifestyle.socialLevel ?? "");
-        setGuests(lifestyle.guests ?? "");
-        if (typeof lifestyle.budget === "number") setBudget(lifestyle.budget);
-      } catch (error) {
-        console.error("Error loading profile:", error);
-        if (!cancelled) setSaveStatus("No se pudo cargar el perfil");
-      } finally {
-        if (!cancelled) setIsLoadingProfile(false);
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    setFullName(activeProfile.name ?? "");
+    setAge(
+      activeProfile.age !== null && activeProfile.age !== undefined
+        ? String(activeProfile.age)
+        : "",
+    );
+    setProfileImage(activeProfile.avatar_url ?? "");
+    setBio(activeProfile.bio ?? "");
+    setSelectedInterests(activeProfile.interests ?? []);
+    if (activeProfile.city) {
+      setSearchQuery(activeProfile.city);
+      setSelectedLocation({ name: activeProfile.city, lat: 0, lon: 0 });
+    } else {
+      setSearchQuery("");
+      setSelectedLocation(null);
+    }
+    const lifestyle = activeProfile.lifestyle ?? {};
+    setSleepSchedule(lifestyle.sleepSchedule ?? "");
+    setCleanliness(lifestyle.cleanliness ?? "");
+    setSocialLevel(lifestyle.socialLevel ?? "");
+    setGuests(lifestyle.guests ?? "");
+    setBudget(typeof lifestyle.budget === "number" ? lifestyle.budget : 1500);
+    setSaveStatus("");
+    setIsLoadingProfile(false);
+  }, [activeProfile]);
 
   const handleSave = async () => {
-    if (!profileId) {
+    if (!activeProfile) {
       setSaveStatus("No hay perfil disponible para guardar");
       return;
     }
     setIsSaving(true);
     setSaveStatus("");
     try {
-      await updateProfile(profileId, {
+      await updateProfile(activeProfile.id, {
         name: fullName || null,
         age: age ? Number(age) : null,
         city: selectedLocation?.name ?? searchQuery ?? null,
@@ -156,6 +150,11 @@ function Profile() {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate({ to: "/login" });
   };
 
   const searchLocation = async (query: string) => {
@@ -221,7 +220,7 @@ function Profile() {
           </form>
           <div
             ref={mapContainerRef}
-            className="w-full h-80 rounded-2xl shadow-md overflow-hidden border border-surface-container-high"
+            className="w-full h-80 rounded-2xl shadow-md overflow-hidden border border-surface-container-high isolate"
           />
           {selectedLocation && (
             <div className="p-4 rounded-lg bg-surface-container-lowest border border-surface-container-high shadow-sm">
@@ -527,6 +526,15 @@ function Profile() {
             )}
           </label>
         </section>
+
+        <button
+          type="button"
+          onClick={() => void handleLogout()}
+          className="flex items-center justify-center gap-2 text-error font-label-md text-label-md py-2 hover:opacity-80 transition-opacity cursor-pointer"
+        >
+          <span className="material-symbols-outlined text-[20px]">logout</span>
+          Cerrar sesión
+        </button>
       </main>
 
       <div className="fixed bottom-[88px] left-0 w-full bg-surface/90 backdrop-blur-md border-t border-surface-container p-container-margin z-40">

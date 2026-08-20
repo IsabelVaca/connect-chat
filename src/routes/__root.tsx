@@ -125,9 +125,11 @@ function RootShell({ children }: { children: ReactNode }) {
 import { useNavigate } from "@tanstack/react-router";
 import { DetailedProfileView } from "../components/DetailedProfileView";
 import { useAppState } from "../lib/app-state";
+import { fetchCurrentProfile } from "../lib/profile-api";
+import { findMatchBetween } from "../lib/match-api";
 
 function RootAppStateOverlay() {
-  const { selectedProfileId, setSelectedProfileId, userProfiles, startChat } = useAppState();
+  const { selectedProfileId, setSelectedProfileId, userProfiles } = useAppState();
   const navigate = useNavigate();
 
   if (!selectedProfileId) return null;
@@ -139,10 +141,17 @@ function RootAppStateOverlay() {
     <DetailedProfileView
       profile={profile}
       onClose={() => setSelectedProfileId(null)}
-      onMessage={(id) => {
-        startChat(id);
+      onMessage={async (id) => {
         setSelectedProfileId(null);
-        navigate({ to: "/matches/$contactId", params: { contactId: id } });
+        // The chat route is keyed by match id, so resolve the real match before navigating.
+        const current = await fetchCurrentProfile();
+        if (!current) return;
+        const match = await findMatchBetween(current.id, id);
+        if (match) {
+          navigate({ to: "/matches/$contactId", params: { contactId: match.id } });
+        } else {
+          navigate({ to: "/matches" });
+        }
       }}
     />
   );

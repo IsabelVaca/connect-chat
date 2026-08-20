@@ -1,9 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import type { MouseEvent } from "react";
+import { useEffect, useState } from "react";
 import { TopAppBar } from "../components/TopAppBar";
 import { BottomNav } from "../components/BottomNav";
-import { mutualMatches } from "../lib/mock-data";
 import { useAppState } from "../lib/app-state";
+import type { ProfileRow } from "@/integrations/supabase/client";
+import {
+  fetchMatches,
+  avatarFor,
+  formatRelativeDay,
+  mapProfileRowToUserProfile,
+  type MatchWithProfile,
+} from "../lib/match-api";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/matches/")({
   head: () => ({
@@ -32,7 +41,41 @@ function handlePointerMove(event: MouseEvent<HTMLAnchorElement>) {
 }
 
 function Matches() {
-  const { conversations, contacts, setSelectedProfileId } = useAppState();
+  const { setSelectedProfileId, addProfiles, activeProfile } = useAppState();
+  const [matches, setMatches] = useState<MatchWithProfile[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showAllMatches, setShowAllMatches] = useState(false);
+
+  useEffect(() => {
+    if (!activeProfile) {
+      setMatches([]);
+      setIsLoading(true);
+      return;
+    }
+    let active = true;
+    setIsLoading(true);
+    void fetchMatches(activeProfile.id)
+      .then((data) => {
+        if (active) setMatches(data);
+      })
+      .catch((err) => console.error("Error loading matches:", err))
+      .finally(() => {
+        if (active) setIsLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [activeProfile]);
+
+  const openProfile = (profile: ProfileRow) => {
+    if (!activeProfile) return;
+    const mapped = mapProfileRowToUserProfile(profile, activeProfile);
+    addProfiles([mapped]);
+    setSelectedProfileId(mapped.id);
+    setShowAllMatches(false);
+  };
+
+  const newMatches = matches.filter((m) => !m.lastMessage);
 
   return (
     <div className="bg-surface text-on-surface min-h-screen flex flex-col pb-[90px]">
@@ -45,30 +88,29 @@ function Matches() {
             </h2>
           </div>
           <div className="flex overflow-x-auto hide-scrollbar px-container-margin gap-4 pb-4">
-            {mutualMatches.map((match) => (
+            {newMatches.map(({ match, profile }) => (
               <button
                 key={match.id}
-                onClick={() => setSelectedProfileId(match.id)}
+                onClick={() => openProfile(profile)}
                 className="flex flex-col items-center gap-2 flex-shrink-0 cursor-pointer group border-0 bg-transparent text-left outline-none"
               >
                 <div className="relative w-[72px] h-[72px]">
                   <img
-                    className={`w-full h-full rounded-full object-cover border-2 transition-transform duration-300 ${
-                      match.isNew
-                        ? "border-brand group-hover:scale-105"
-                        : "border-outline-variant group-hover:border-brand"
-                    }`}
-                    alt={`${match.name}'s profile`}
-                    src={match.avatar}
+                    className="w-full h-full rounded-full object-cover border-2 border-brand group-hover:scale-105 transition-transform duration-300"
+                    alt={`${profile.name ?? "Roomie"}'s profile`}
+                    src={avatarFor(profile)}
                   />
                 </div>
                 <span className="font-label-sm text-label-sm text-on-surface text-center">
-                  {match.name}
+                  {profile.name ?? "Roomie"}
                 </span>
               </button>
             ))}
             <div className="flex flex-col items-center justify-center gap-2 flex-shrink-0 w-[72px]">
-              <button className="w-[72px] h-[72px] rounded-full bg-surface-container-low border border-outline-variant flex items-center justify-center text-brand hover:bg-surface-container-high transition-colors">
+              <button
+                onClick={() => setShowAllMatches(true)}
+                className="w-[72px] h-[72px] rounded-full bg-surface-container-low border border-outline-variant flex items-center justify-center text-brand hover:bg-surface-container-high transition-colors cursor-pointer"
+              >
                 <span className="material-symbols-outlined">arrow_forward</span>
               </button>
               <span className="font-label-sm text-label-sm text-on-surface-variant text-center">
@@ -82,24 +124,21 @@ function Matches() {
           <h2 className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-stack-sm">
             Messages
           </h2>
-          <div className="flex flex-col gap-3">
-            {contacts.map((contact) => {
-              const thread = conversations[contact.id] ?? [];
-              const last = thread[thread.length - 1];
-              const preview = last ? last.text : contact.lastMessage;
-              const unread = Boolean(contact.unread);
-
-              return (
+          {isLoading ? (
+            <p className="font-body-md text-body-md text-on-surface-variant">Cargando matches...</p>
+          ) : matches.length === 0 ? (
+            <p className="font-body-md text-body-md text-on-surface-variant">
+              Todavía no tienes matches. ¡Sigue explorando en Discovery!
+            </p>
+          ) : (
+            <div className="flex flex-col gap-3">
+              {matches.map(({ match, profile, lastMessage }) => (
                 <Link
-                  key={contact.id}
+                  key={match.id}
                   to="/matches/$contactId"
-                  params={{ contactId: contact.id }}
+                  params={{ contactId: match.id }}
                   onMouseMove={handlePointerMove}
-                  className={`group isolate rounded-xl p-4 flex items-center gap-4 cursor-pointer transition-colors relative overflow-hidden ${
-                    unread
-                      ? "bg-surface-container-lowest shadow-[0_8px_24px_rgba(169,51,73,0.06)]"
-                      : "bg-surface border border-outline-variant/30"
-                  }`}
+                  className="group isolate rounded-xl p-4 flex items-center gap-4 cursor-pointer transition-colors relative overflow-hidden bg-surface border border-outline-variant/30"
                 >
                   <div
                     aria-hidden="true"
@@ -110,65 +149,65 @@ function Matches() {
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      setSelectedProfileId(contact.id);
+                      openProfile(profile);
                     }}
                   >
                     <img
-                      className={`w-full h-full rounded-full object-cover ${unread ? "" : "opacity-90"}`}
-                      alt={`${contact.name}'s profile`}
-                      src={contact.avatar}
+                      className="w-full h-full rounded-full object-cover"
+                      alt={`${profile.name ?? "Roomie"}'s profile`}
+                      src={avatarFor(profile)}
                     />
-                    {contact.online && (
-                      <span className="absolute bottom-0 right-0 w-3 h-3 bg-teal rounded-full border-2 border-surface-container-lowest" />
-                    )}
                   </div>
                   <div className="flex-grow min-w-0">
-                    <h3 className="font-label-md text-label-md text-on-surface truncate pr-2 flex items-center gap-1 mb-1">
-                      {contact.name}
-                      {contact.verified && (
-                        <span className="material-symbols-outlined text-teal text-[14px] icon-filled">
-                          verified_user
-                        </span>
-                      )}
+                    <h3 className="font-label-md text-label-md text-on-surface truncate pr-2 mb-1">
+                      {profile.name ?? "Roomie"}
                     </h3>
-                    <p
-                      className={`font-body-md text-body-md truncate ${
-                        unread ? "text-on-surface font-medium" : "text-on-surface-variant"
-                      }`}
-                    >
-                      {preview}
+                    <p className="font-body-md text-body-md text-on-surface-variant truncate">
+                      {lastMessage?.content ?? "Di hola 👋"}
                     </p>
                   </div>
-                  <div className="flex-shrink-0 flex items-center gap-2">
-                    <span
-                      className={`font-label-sm text-label-sm px-2 py-0.5 rounded-full ${
-                        unread
-                          ? "bg-secondary-container text-on-secondary-container"
-                          : "bg-surface-container-high text-on-surface-variant"
-                      }`}
-                    >
-                      {contact.compatibility}%
-                    </span>
-                    <span
-                      className={`font-label-sm text-label-sm flex-shrink-0 ${
-                        unread ? "text-brand" : "text-on-surface-variant"
-                      }`}
-                    >
-                      {contact.when}
-                    </span>
-                    {contact.unread ? (
-                      <div className="w-5 h-5 bg-brand text-on-brand rounded-full flex items-center justify-center font-label-sm text-[10px]">
-                        {contact.unread}
-                      </div>
-                    ) : null}
-                  </div>
+                  <span className="font-label-sm text-label-sm flex-shrink-0 text-on-surface-variant">
+                    {formatRelativeDay(lastMessage?.created_at ?? match.created_at)}
+                  </span>
                 </Link>
-              );
-            })}
-          </div>
+              ))}
+            </div>
+          )}
         </section>
       </main>
       <BottomNav />
+
+      <Dialog open={showAllMatches} onOpenChange={setShowAllMatches}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Tus Matches</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-2 max-h-[60vh] overflow-y-auto">
+            {matches.length === 0 ? (
+              <p className="font-body-md text-body-md text-on-surface-variant">
+                Todavía no tienes matches.
+              </p>
+            ) : (
+              matches.map(({ match, profile }) => (
+                <button
+                  key={match.id}
+                  onClick={() => openProfile(profile)}
+                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-surface-container-low transition-colors text-left cursor-pointer"
+                >
+                  <img
+                    src={avatarFor(profile)}
+                    alt={`${profile.name ?? "Roomie"}'s profile`}
+                    className="w-12 h-12 rounded-full object-cover"
+                  />
+                  <span className="font-label-md text-label-md text-on-surface">
+                    {profile.name ?? "Roomie"}
+                  </span>
+                </button>
+              ))
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

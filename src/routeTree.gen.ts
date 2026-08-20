@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as MatchesIndexRouteImport } from './routes/matches.index'
 import { Route as MatchesContactIdRouteImport } from './routes/matches.$contactId'
@@ -17,6 +18,11 @@ import { Route as MatchesContactIdRouteImport } from './routes/matches.$contactI
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileRoute = ProfileRouteImport.update({
@@ -37,12 +43,14 @@ const MatchesContactIdRoute = MatchesContactIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/matches/$contactId': typeof MatchesContactIdRoute
   '/matches/': typeof MatchesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/matches/$contactId': typeof MatchesContactIdRoute
   '/matches': typeof MatchesIndexRoute
@@ -50,20 +58,28 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
   '/profile': typeof ProfileRoute
   '/matches/$contactId': typeof MatchesContactIdRoute
   '/matches/': typeof MatchesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/profile' | '/matches/$contactId' | '/matches/'
+  fullPaths: '/' | '/login' | '/profile' | '/matches/$contactId' | '/matches/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/profile' | '/matches/$contactId' | '/matches'
-  id: '__root__' | '/' | '/profile' | '/matches/$contactId' | '/matches/'
+  to: '/' | '/login' | '/profile' | '/matches/$contactId' | '/matches'
+  id:
+    | '__root__'
+    | '/'
+    | '/login'
+    | '/profile'
+    | '/matches/$contactId'
+    | '/matches/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  LoginRoute: typeof LoginRoute
   ProfileRoute: typeof ProfileRoute
   MatchesContactIdRoute: typeof MatchesContactIdRoute
   MatchesIndexRoute: typeof MatchesIndexRoute
@@ -76,6 +92,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile': {
@@ -104,6 +127,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  LoginRoute: LoginRoute,
   ProfileRoute: ProfileRoute,
   MatchesContactIdRoute: MatchesContactIdRoute,
   MatchesIndexRoute: MatchesIndexRoute,

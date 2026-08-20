@@ -1,18 +1,34 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { userProfiles } from "../lib/mock-data";
+import { fetchCurrentProfile } from "@/lib/profile-api";
 import { useAppState } from "../lib/app-state";
+import {
+  fetchMatchById,
+  fetchProfileById,
+  fetchMessages,
+  sendMessageToMatch,
+  subscribeToMatchMessages,
+  otherUserId,
+  avatarFor,
+  formatMessageTime,
+  type MessageRow,
+} from "../lib/match-api";
 
 export const Route = createFileRoute("/matches/$contactId")({
-  loader: ({ params }) => {
-    const profile = userProfiles.find((c) => c.id === params.contactId);
-    if (!profile) throw notFound();
-    return {
-      contact: {
-        ...profile,
-        avatar: profile.photo, // Map photo to avatar for backward compatibility
-      },
-    };
+  loader: async ({ params }) => {
+    const currentUser = await fetchCurrentProfile();
+    if (!currentUser) throw notFound();
+
+    const match = await fetchMatchById(params.contactId);
+    if (!match) throw notFound();
+
+    const otherId = otherUserId(match, currentUser.id);
+    const otherProfile = await fetchProfileById(otherId);
+    if (!otherProfile) throw notFound();
+
+    const initialMessages = await fetchMessages(match.id);
+
+    return { match, otherProfile, initialMessages };
   },
   head: ({ loaderData }) => {
     if (!loaderData) {
@@ -20,8 +36,9 @@ export const Route = createFileRoute("/matches/$contactId")({
         meta: [{ title: "Conversation — RoomieMatch" }, { name: "robots", content: "noindex" }],
       };
     }
-    const title = `Chat with ${loaderData.contact.name} — RoomieMatch`;
-    const description = `Your conversation with ${loaderData.contact.name} on RoomieMatch.`;
+    const name = loaderData.otherProfile.name ?? "Roomie";
+    const title = `Chat with ${name} — RoomieMatch`;
+    const description = `Your conversation with ${name} on RoomieMatch.`;
     return {
       meta: [
         { title },
@@ -35,23 +52,40 @@ export const Route = createFileRoute("/matches/$contactId")({
 });
 
 function Conversation() {
-  const { contact } = Route.useLoaderData();
-  const { conversations, sendMessage } = useAppState();
+  const { match, otherProfile, initialMessages } = Route.useLoaderData();
+  const { activeProfile } = useAppState();
+  const [messages, setMessages] = useState<MessageRow[]>(initialMessages);
   const [draft, setDraft] = useState("");
   const endRef = useRef<HTMLDivElement>(null);
-  const messages = conversations[contact.id] ?? [];
+
+  useEffect(() => {
+    const unsubscribe = subscribeToMatchMessages(match.id, (incoming) => {
+      setMessages((prev) => (prev.some((m) => m.id === incoming.id) ? prev : [...prev, incoming]));
+    });
+    return unsubscribe;
+  }, [match.id]);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ block: "end" });
   }, [messages.length]);
 
-  function handleSubmit(event: FormEvent) {
+  async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     const text = draft.trim();
-    if (!text) return;
-    sendMessage(contact.id, text);
+    if (!text || !activeProfile) return;
     setDraft("");
+    try {
+      const sent = await sendMessageToMatch(match.id, activeProfile.id, text);
+      // Append optimistically — the realtime channel only needs to cover the
+      // other participant's messages; a dedup check in the subscription
+      // handler guards against a double-add if it also echoes our own insert.
+      setMessages((prev) => (prev.some((m) => m.id === sent.id) ? prev : [...prev, sent]));
+    } catch (err) {
+      console.error("Error sending message:", err);
+    }
   }
+
+  const name = otherProfile.name ?? "Roomie";
 
   return (
     <div className="bg-surface text-on-surface min-h-screen flex flex-col">
@@ -65,27 +99,17 @@ function Conversation() {
         </Link>
         <img
           className="w-10 h-10 rounded-full object-cover"
-          src={contact.avatar}
-          alt={`${contact.name}'s profile`}
+          src={avatarFor(otherProfile)}
+          alt={`${name}'s profile`}
         />
         <div className="min-w-0">
-          <h1 className="font-label-md text-label-md text-on-surface truncate flex items-center gap-1">
-            {contact.name}
-            {contact.verified && (
-              <span className="material-symbols-outlined text-teal text-[14px] icon-filled">
-                verified_user
-              </span>
-            )}
-          </h1>
-          <p className="font-label-sm text-label-sm text-on-surface-variant">
-            {contact.compatibility}% Compatible
-          </p>
+          <h1 className="font-label-md text-label-md text-on-surface truncate">{name}</h1>
         </div>
       </header>
 
       <main className="flex-grow w-full max-w-2xl mx-auto px-container-margin py-stack-md pb-32 flex flex-col gap-3">
         {messages.map((message) => {
-          const mine = message.from === "me";
+          const mine = message.sender_id === activeProfile?.id;
           return (
             <div key={message.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
               <div
@@ -96,14 +120,14 @@ function Conversation() {
                 }`}
               >
                 <p className="font-body-md text-body-md whitespace-pre-wrap break-words">
-                  {message.text}
+                  {message.content}
                 </p>
                 <span
                   className={`block mt-1 font-label-sm text-label-sm ${
                     mine ? "text-on-brand/70 text-right" : "text-on-surface-variant"
                   }`}
                 >
-                  {message.time}
+                  {formatMessageTime(message.created_at)}
                 </span>
               </div>
             </div>
@@ -121,7 +145,7 @@ function Conversation() {
             value={draft}
             onChange={(event) => setDraft(event.target.value)}
             aria-label="Write a message"
-            placeholder={`Message ${contact.name}...`}
+            placeholder={`Message ${name}...`}
             className="flex-grow bg-surface-container-lowest border border-outline-variant rounded-xl py-3 px-4 text-body-md text-on-surface placeholder:text-on-surface-variant/70 focus:border-brand focus:ring-1 focus:ring-brand outline-none transition-colors"
           />
           <button
