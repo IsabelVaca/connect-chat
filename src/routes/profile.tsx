@@ -13,15 +13,15 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 export const Route = createFileRoute("/profile")({
   head: () => ({
     meta: [
-      { title: "Profile & Preferences — RoomieMatch" },
+      { title: "Perfil y preferencias — RoomieMatch" },
       {
         name: "description",
-        content: "Set your location, budget and move-in date so we can find your ideal roomies.",
+        content: "Configura tu ubicación, presupuesto y fecha de mudanza para encontrar a tus roomies ideales.",
       },
-      { property: "og:title", content: "Profile & Preferences — RoomieMatch" },
+      { property: "og:title", content: "Perfil y preferencias — RoomieMatch" },
       {
         property: "og:description",
-        content: "Set your location, budget and move-in date so we can find your ideal roomies.",
+        content: "Configura tu ubicación, presupuesto y fecha de mudanza para encontrar a tus roomies ideales.",
       },
     ],
   }),
@@ -194,25 +194,25 @@ function Profile() {
   return (
     <div className="min-h-screen flex flex-col bg-surface text-on-surface">
       <TopAppBar />
-      <main className="flex-grow px-container-margin py-stack-md flex flex-col gap-stack-lg max-w-[600px] mx-auto w-full pb-72">
+      <main className="flex-grow px-container-margin py-stack-md flex flex-col gap-stack-lg max-w-[600px] mx-auto w-full pb-32">
         {/* Location Section */}
         <section className="flex flex-col gap-stack-md">
           <h2 className="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">
-            Where to?
+            ¿Dónde buscas?
           </h2>
           <form onSubmit={handleSearchSubmit} className="flex gap-2">
             <input
               type="text"
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Search for a city or location..."
-              aria-label="Search for a city or location"
+              placeholder="Busca una ciudad o ubicación..."
+              aria-label="Buscar una ciudad o ubicación"
               className="flex-1 px-4 py-2.5 rounded-lg border border-surface-container-high bg-surface-container-lowest text-on-surface placeholder-on-surface/50 font-body-md focus:outline-none focus:ring-2 focus:ring-brand"
             />
             <button
               type="submit"
               disabled={isSearching}
-              aria-label="Search location"
+              aria-label="Buscar ubicación"
               className="px-4 py-2.5 rounded-lg bg-brand text-on-brand font-label-md hover:opacity-90 disabled:opacity-50 transition-opacity"
             >
               <span className="material-symbols-outlined text-[20px]">search</span>
@@ -229,14 +229,14 @@ function Profile() {
                   location_on
                 </span>
                 <p className="font-label-lg text-label-lg text-on-surface font-semibold">
-                  Selected Location
+                  Ubicación seleccionada
                 </p>
               </div>
               <p className="text-body-sm text-on-surface/70 line-clamp-2">
                 {selectedLocation.name}
               </p>
               <p className="text-label-sm text-on-surface/50 mt-2">
-                Coordinates: {selectedLocation.lat.toFixed(4)}, {selectedLocation.lon.toFixed(4)}
+                Coordenadas: {selectedLocation.lat.toFixed(4)}, {selectedLocation.lon.toFixed(4)}
               </p>
             </div>
           )}
@@ -245,12 +245,12 @@ function Profile() {
         {/* Bio Section */}
         <section className="bg-surface-container-lowest rounded-[24px] p-stack-md shadow-[0_8px_30px_rgba(169,51,73,0.06)] flex flex-col gap-stack-sm">
           <h3 className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">
-            About Me
+            Sobre mí
           </h3>
           <textarea
             value={bio}
             onChange={(e) => setBio(e.target.value)}
-            placeholder="Tell us about yourself..."
+            placeholder="Cuéntanos sobre ti..."
             maxLength={500}
             className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl p-4 text-body-md text-on-surface placeholder-on-surface-variant/50 font-body-md focus:outline-none focus:ring-2 focus:ring-brand resize-none"
             rows={5}
@@ -261,7 +261,7 @@ function Profile() {
         {/* Interests Section */}
         <section className="bg-surface-container-lowest rounded-[24px] p-stack-md shadow-[0_8px_30px_rgba(169,51,73,0.06)] flex flex-col gap-stack-sm">
           <h3 className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">
-            Interests
+            Intereses
           </h3>
           <div className="flex flex-wrap gap-2">
             {interestsList.map((interest) => (
@@ -286,20 +286,20 @@ function Profile() {
           </div>
         </section>
 
-        {/* Lifestyle Match Section */}
+        {/* Estilo de vida Section */}
         <section className="bg-surface-container-lowest rounded-[24px] p-stack-md shadow-[0_8px_30px_rgba(169,51,73,0.06)] flex flex-col gap-stack-sm">
           <h3 className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">
-            Lifestyle Match
+            Estilo de vida
           </h3>
 
           {/* Sleep Schedule */}
           <Collapsible>
             <CollapsibleTrigger className="flex items-center justify-between w-full p-4 rounded-lg border border-outline-variant hover:bg-surface-container-high transition-colors">
-              <span className="font-label-lg text-label-lg text-on-surface">Sleep Schedule</span>
+              <span className="font-label-lg text-label-lg text-on-surface">Horario de sueño</span>
               <span className="material-symbols-outlined">expand_more</span>
             </CollapsibleTrigger>
             <CollapsibleContent className="pt-2 space-y-2">
-              {["Early Bird", "Night Owl"].map((option) => (
+              {["Madrugador", "Nocturno"].map((option) => (
                 <button
                   key={option}
                   onClick={() => setSleepSchedule(option)}
@@ -318,11 +318,11 @@ function Profile() {
           {/* Cleanliness */}
           <Collapsible>
             <CollapsibleTrigger className="flex items-center justify-between w-full p-4 rounded-lg border border-outline-variant hover:bg-surface-container-high transition-colors">
-              <span className="font-label-lg text-label-lg text-on-surface">Cleanliness</span>
+              <span className="font-label-lg text-label-lg text-on-surface">Limpieza</span>
               <span className="material-symbols-outlined">expand_more</span>
             </CollapsibleTrigger>
             <CollapsibleContent className="pt-2 space-y-2">
-              {["Strictly clean", "Tidy", "Relaxed"].map((option) => (
+              {["Muy limpio", "Ordenado", "Relajado"].map((option) => (
                 <button
                   key={option}
                   onClick={() => setCleanliness(option)}
@@ -341,11 +341,11 @@ function Profile() {
           {/* Social Level */}
           <Collapsible>
             <CollapsibleTrigger className="flex items-center justify-between w-full p-4 rounded-lg border border-outline-variant hover:bg-surface-container-high transition-colors">
-              <span className="font-label-lg text-label-lg text-on-surface">Social Level</span>
+              <span className="font-label-lg text-label-lg text-on-surface">Nivel social</span>
               <span className="material-symbols-outlined">expand_more</span>
             </CollapsibleTrigger>
             <CollapsibleContent className="pt-2 space-y-2">
-              {["Introvert", "Values Quiet", "Party Host"].map((option) => (
+              {["Introvertido", "Valora la calma", "Anfitrión de fiestas"].map((option) => (
                 <button
                   key={option}
                   onClick={() => setSocialLevel(option)}
@@ -364,11 +364,11 @@ function Profile() {
           {/* Guests */}
           <Collapsible>
             <CollapsibleTrigger className="flex items-center justify-between w-full p-4 rounded-lg border border-outline-variant hover:bg-surface-container-high transition-colors">
-              <span className="font-label-lg text-label-lg text-on-surface">Guests</span>
+              <span className="font-label-lg text-label-lg text-on-surface">Invitados</span>
               <span className="material-symbols-outlined">expand_more</span>
             </CollapsibleTrigger>
             <CollapsibleContent className="pt-2 space-y-2">
-              {["No guests", "Occasional", "Weekends mostly"].map((option) => (
+              {["Sin invitados", "Ocasional", "Sobre todo fines de semana"].map((option) => (
                 <button
                   key={option}
                   onClick={() => setGuests(option)}
@@ -387,7 +387,7 @@ function Profile() {
 
         <section className="bg-surface-container-lowest rounded-[24px] p-stack-md shadow-[0_8px_30px_rgba(169,51,73,0.06)] flex flex-col gap-stack-sm">
           <h3 className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">
-            Current Situation
+            Situación actual
           </h3>
           <div className="grid grid-cols-2 gap-4">
             <label className="cursor-pointer relative">
@@ -397,7 +397,7 @@ function Profile() {
                   group_add
                 </span>
                 <span className="font-label-md text-label-md text-center text-on-surface">
-                  Looking for a place together
+                  Busco lugar en conjunto
                 </span>
               </div>
             </label>
@@ -408,7 +408,7 @@ function Profile() {
                   home
                 </span>
                 <span className="font-label-md text-label-md text-center text-on-surface">
-                  I already have a place
+                  Ya tengo lugar
                 </span>
               </div>
             </label>
@@ -418,7 +418,7 @@ function Profile() {
         <section className="bg-surface-container-lowest rounded-[24px] p-stack-md shadow-[0_8px_30px_rgba(169,51,73,0.06)] flex flex-col gap-stack-sm">
           <div className="flex justify-between items-center">
             <h3 className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">
-              Monthly Budget
+              Presupuesto mensual
             </h3>
             <span className="font-headline-md text-headline-md text-brand">${budget}</span>
           </div>
@@ -429,7 +429,7 @@ function Profile() {
               max={4000}
               step={50}
               value={budget}
-              aria-label="Monthly budget"
+              aria-label="Presupuesto mensual"
               onChange={(event) => setBudget(Number(event.target.value))}
               className="w-full h-2 bg-surface-container-high rounded-full appearance-none slider-thumb outline-none"
             />
@@ -442,7 +442,7 @@ function Profile() {
 
         <section className="bg-surface-container-lowest rounded-[24px] p-stack-md shadow-[0_8px_30px_rgba(169,51,73,0.06)] flex flex-col gap-stack-sm">
           <h3 className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">
-            Move-in Date
+            Fecha de mudanza
           </h3>
           <div className="relative">
             <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">
@@ -450,7 +450,7 @@ function Profile() {
             </span>
             <input
               type="date"
-              aria-label="Move-in date"
+              aria-label="Fecha de mudanza"
               className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl py-4 pl-12 pr-4 text-body-md text-on-surface focus:border-brand focus:ring-1 focus:ring-brand outline-none transition-colors"
             />
           </div>
@@ -461,7 +461,7 @@ function Profile() {
                 className="rounded text-brand focus:ring-brand w-5 h-5 border-outline-variant bg-surface-container-lowest"
               />
               <span className="font-label-md text-label-md text-on-surface-variant">
-                I'm flexible with dates (+/- 2 weeks)
+                Soy flexible con las fechas (+/- 2 semanas)
               </span>
             </label>
           </div>
