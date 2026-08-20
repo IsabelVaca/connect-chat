@@ -473,28 +473,28 @@ function Profile() {
           </h3>
 
           <label className="flex flex-col gap-2">
-            <span className="font-label-md text-label-md text-on-surface">Full Name</span>
+            <span className="font-label-md text-label-md text-on-surface">Nombre completo</span>
             <input
               type="text"
               value={fullName}
               onChange={(event) => setFullName(event.target.value)}
-              placeholder="Your name and last name"
+              placeholder="Tu nombre y apellido"
               className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl py-4 px-4 text-body-md text-on-surface placeholder:text-on-surface-variant/70 focus:border-brand focus:ring-1 focus:ring-brand outline-none transition-colors"
             />
           </label>
           <label className="flex flex-col gap-2">
-            <span className="font-label-md text-label-md text-on-surface">Age</span>
+            <span className="font-label-md text-label-md text-on-surface">Edad</span>
             <input
               type="number"
               min={18}
               value={age}
               onChange={(event) => setAge(event.target.value)}
-              placeholder="Your age"
+              placeholder="Tu edad"
               className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl py-4 px-4 text-body-md text-on-surface placeholder:text-on-surface-variant/70 focus:border-brand focus:ring-1 focus:ring-brand outline-none transition-colors"
             />
           </label>
           <label className="flex flex-col gap-2">
-            <span className="font-label-md text-label-md text-on-surface">Profile Image</span>
+            <span className="font-label-md text-label-md text-on-surface">Foto de perfil</span>
             {!profileImage && (
               <span className="text-body-sm italic text-on-surface-variant">
                 Sin archivos adjuntos.
@@ -521,25 +521,14 @@ function Profile() {
             {profileImage && (
               <img
                 src={profileImage}
-                alt="Profile preview"
+                alt="Vista previa del perfil"
                 className="h-24 w-24 rounded-full object-cover"
               />
             )}
           </label>
         </section>
 
-        <button
-          type="button"
-          onClick={() => void handleLogout()}
-          className="flex items-center justify-center gap-2 text-error font-label-md text-label-md py-2 hover:opacity-80 transition-opacity cursor-pointer"
-        >
-          <span className="material-symbols-outlined text-[20px]">logout</span>
-          Cerrar sesión
-        </button>
-      </main>
-
-      <div className="fixed bottom-[88px] left-0 w-full bg-surface/90 backdrop-blur-md border-t border-surface-container p-container-margin z-40">
-        <div className="max-w-[600px] mx-auto flex flex-col gap-2">
+        <div className="flex flex-col gap-2">
           {saveStatus && (
             <p className="text-label-sm text-on-surface-variant text-center">{saveStatus}</p>
           )}
@@ -547,22 +536,24 @@ function Profile() {
             type="button"
             onClick={() => void handleSave()}
             disabled={isSaving || isLoadingProfile}
-            className="w-full border border-brand text-brand font-label-lg text-label-lg py-3 rounded-xl hover:bg-primary-container/10 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+            className="w-full border border-brand text-brand font-label-lg text-label-lg py-3 rounded-xl hover:bg-primary-container/10 disabled:opacity-50 transition-colors flex items-center justify-center gap-2 cursor-pointer"
           >
             <span className="material-symbols-outlined">save</span>
-            {isSaving ? "Guardando..." : "Guardar cambios"}
+            {isSaving ? "Guardando..." : "Guardar perfil"}
           </button>
           <button
             type="button"
-            onClick={() => navigate({ to: "/" })}
-            className="w-full bg-gradient-to-r from-brand to-[#c2425a] text-on-brand font-headline-md text-[20px] font-semibold py-4 rounded-xl shadow-[0_8px_25px_rgba(169,51,73,0.3)] hover:scale-[1.02] transition-transform active:scale-95 flex items-center justify-center gap-2"
+            onClick={() => void handleLogout()}
+            className="flex items-center justify-center gap-2 text-error font-label-md text-label-md py-2 hover:opacity-80 transition-opacity cursor-pointer"
           >
-            Find Roomies
-            <span className="material-symbols-outlined">arrow_forward</span>
+            <span className="material-symbols-outlined text-[20px]">logout</span>
+            Cerrar sesión
           </button>
         </div>
-      </div>
+      </main>
+
       <BottomNav />
+
     </div>
   );
 }
