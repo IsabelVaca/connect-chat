@@ -81,13 +81,6 @@ function Login() {
             {isSubmitting ? "Un momento..." : "Iniciar sesión"}
           </button>
         </form>
-
-        <Link
-          to="/"
-          className="text-center font-label-sm text-label-sm text-on-surface-variant hover:opacity-80 transition-opacity"
-        >
-          Volver a Discovery
-        </Link>
       </div>
     </div>
   );
