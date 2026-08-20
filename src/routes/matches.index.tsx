@@ -20,12 +20,12 @@ export const Route = createFileRoute("/matches/")({
       { title: "Matches — RoomieMatch" },
       {
         name: "description",
-        content: "See your mutual roommate matches and keep the conversation going.",
+        content: "Consulta tus matches de roomies y sigue la conversación.",
       },
       { property: "og:title", content: "Matches — RoomieMatch" },
       {
         property: "og:description",
-        content: "See your mutual roommate matches and keep the conversation going.",
+        content: "Consulta tus matches de roomies y sigue la conversación.",
       },
     ],
   }),
@@ -84,7 +84,7 @@ function Matches() {
         <section className="mt-stack-sm mb-stack-md">
           <div className="px-container-margin mb-stack-sm flex justify-between items-center">
             <h2 className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">
-              New Mutual Matches
+              Nuevos matches
             </h2>
           </div>
           <div className="flex overflow-x-auto hide-scrollbar px-container-margin gap-4 pb-4">
@@ -97,7 +97,7 @@ function Matches() {
                 <div className="relative w-[72px] h-[72px]">
                   <img
                     className="w-full h-full rounded-full object-cover border-2 border-brand group-hover:scale-105 transition-transform duration-300"
-                    alt={`${profile.name ?? "Roomie"}'s profile`}
+                    alt={`Perfil de ${profile.name ?? "Roomie"}`}
                     src={avatarFor(profile)}
                   />
                 </div>
@@ -114,7 +114,7 @@ function Matches() {
                 <span className="material-symbols-outlined">arrow_forward</span>
               </button>
               <span className="font-label-sm text-label-sm text-on-surface-variant text-center">
-                More
+                Más
               </span>
             </div>
           </div>
@@ -122,7 +122,7 @@ function Matches() {
 
         <section className="px-container-margin">
           <h2 className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-stack-sm">
-            Messages
+            Mensajes
           </h2>
           {isLoading ? (
             <p className="font-body-md text-body-md text-on-surface-variant">Cargando matches...</p>
@@ -154,7 +154,7 @@ function Matches() {
                   >
                     <img
                       className="w-full h-full rounded-full object-cover"
-                      alt={`${profile.name ?? "Roomie"}'s profile`}
+                      alt={`Perfil de ${profile.name ?? "Roomie"}`}
                       src={avatarFor(profile)}
                     />
                   </div>
@@ -196,7 +196,7 @@ function Matches() {
                 >
                   <img
                     src={avatarFor(profile)}
-                    alt={`${profile.name ?? "Roomie"}'s profile`}
+                    alt={`Perfil de ${profile.name ?? "Roomie"}`}
                     className="w-12 h-12 rounded-full object-cover"
                   />
                   <span className="font-label-md text-label-md text-on-surface">

@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { signInWithUsernamePassword } from "@/lib/profile-api";
 import { useAppState } from "../lib/app-state";
@@ -42,9 +42,8 @@ function Login() {
         <h2 className="font-headline-lg-mobile text-headline-lg-mobile text-on-surface text-center">
           Iniciar sesión
         </h2>
-        <p className="text-label-sm text-on-surface-variant text-center -mt-1">
-          Herramienta de prueba: valida usuario/contraseña contra los perfiles demo.
-        </p>
+
+
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-stack-sm mt-2">
           <label className="flex flex-col gap-2">
@@ -82,13 +81,6 @@ function Login() {
             {isSubmitting ? "Un momento..." : "Iniciar sesión"}
           </button>
         </form>
-
-        <Link
-          to="/"
-          className="text-center font-label-sm text-label-sm text-on-surface-variant hover:opacity-80 transition-opacity"
-        >
-          Volver a Discovery
-        </Link>
       </div>
     </div>
   );
