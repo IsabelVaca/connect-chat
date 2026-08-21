@@ -196,7 +196,7 @@ function Profile() {
   return (
     <div className="min-h-screen flex flex-col bg-surface text-on-surface">
       <TopAppBar />
-      <main className="flex-grow px-container-margin py-stack-md flex flex-col gap-stack-lg max-w-[600px] mx-auto w-full pb-52">
+      <main className="flex-grow px-container-margin py-stack-md flex flex-col gap-stack-lg max-w-[600px] mx-auto w-full pb-24">
         {/* Location Section */}
         <section className="flex flex-col gap-stack-md">
           <h2 className="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">
@@ -543,6 +543,14 @@ function Profile() {
         </button>
         <button
           type="button"
+          onClick={() => navigate({ to: "/" })}
+          className="w-full bg-gradient-to-r from-brand to-[#c2425a] text-on-brand font-headline-md text-[20px] font-semibold py-4 rounded-xl shadow-[0_8px_25px_rgba(169,51,73,0.3)] hover:scale-[1.02] transition-transform active:scale-95 flex items-center justify-center gap-2"
+        >
+          Buscar Roomies
+          <span className="material-symbols-outlined">arrow_forward</span>
+        </button>
+        <button
+          type="button"
           onClick={() => void handleLogout()}
           className="flex items-center justify-center gap-2 text-error font-label-md text-label-md py-2 hover:opacity-80 transition-opacity cursor-pointer"
         >
@@ -551,18 +559,6 @@ function Profile() {
         </button>
       </main>
 
-      <div className="fixed bottom-[88px] left-0 w-full bg-surface/90 backdrop-blur-md border-t border-surface-container p-container-margin z-40">
-        <div className="max-w-[600px] mx-auto">
-          <button
-            type="button"
-            onClick={() => navigate({ to: "/" })}
-            className="w-full bg-gradient-to-r from-brand to-[#c2425a] text-on-brand font-headline-md text-[20px] font-semibold py-4 rounded-xl shadow-[0_8px_25px_rgba(169,51,73,0.3)] hover:scale-[1.02] transition-transform active:scale-95 flex items-center justify-center gap-2"
-          >
-            Buscar Roomies
-            <span className="material-symbols-outlined">arrow_forward</span>
-          </button>
-        </div>
-      </div>
       <BottomNav />
     </div>
   );
